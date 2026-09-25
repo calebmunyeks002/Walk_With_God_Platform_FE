@@ -1,0 +1,61 @@
+<section class="page-head">
+  <div>
+    <span class="eyebrow">OVERVIEW</span>
+    <h1>System Snapshot</h1>
+    <p>Monitor users, content and platform health at a glance.</p>
+  </div>
+  <a routerLink="/admin/audit" class="head-btn">Audit Trail →</a>
+</section>
+
+@if (loading()) {
+  <div class="card">Loading system stats…</div>
+} @else if (error()) {
+  <div class="card error">{{ error() }}</div>
+} @else if (stats(); as s) {
+
+  <section class="stat-grid">
+    <div class="stat-card">
+      <span class="stat-label">Total Users</span>
+      <b>{{ s.totalUsers }}</b>
+      <small>{{ s.totalMembers }} members · {{ s.totalMentors }} mentors</small>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Pending Applications</span>
+      <b>{{ s.pendingMentorApplications }}</b>
+      <small><a routerLink="/admin/mentor-applications">Review →</a></small>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Community Posts</span>
+      <b>{{ s.totalPosts }}</b>
+      <small>{{ s.totalComments }} comments</small>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Active Today</span>
+      <b>{{ s.activeToday }}</b>
+      <small>sessions in last 24h</small>
+    </div>
+  </section>
+
+  <section class="quick-actions">
+    <h3>Quick Actions</h3>
+    <div class="action-grid">
+      <a routerLink="/admin/users" class="action">
+        <span class="action-icon">◉</span>
+        <div><b>Manage Users</b><small>Search, filter, suspend</small></div>
+      </a>
+      <a routerLink="/admin/mentor-applications" class="action">
+        <span class="action-icon">✍</span>
+        <div><b>Mentor Applications</b><small>Approve or reject</small></div>
+      </a>
+      <a routerLink="/admin/reports" class="action">
+        <span class="action-icon">⚠</span>
+        <div><b>Reports</b><small>Flagged content & safeguarding</small></div>
+      </a>
+      <a routerLink="/admin/audit" class="action">
+        <span class="action-icon">⏱</span>
+        <div><b>Audit Trail</b><small>Every action, fully logged</small></div>
+      </a>
+    </div>
+  </section>
+
+}

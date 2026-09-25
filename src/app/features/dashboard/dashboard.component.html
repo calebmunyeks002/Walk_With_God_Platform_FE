@@ -1,0 +1,11 @@
+@switch (role()) {
+@case ('ADMIN') {
+<app-admin-overview />
+}
+@case ('MENTOR') {
+<app-mentor-dashboard />
+}
+@default {
+<app-member-dashboard />
+}
+}

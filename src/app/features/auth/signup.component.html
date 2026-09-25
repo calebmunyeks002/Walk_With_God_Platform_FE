@@ -1,0 +1,73 @@
+<div class="auth-page">
+    <section class="auth-visual">
+        <div class="visual-bg"></div>
+        <div class="visual-overlay"></div>
+
+        <div class="visual-content">
+            <div class="brand-top">
+                <span>✝</span>
+                <strong>Walk<span>With</span>God</strong>
+                <small>FAITH • PURPOSE • GROWTH • A BETTER YOU</small>
+            </div>
+
+            <div class="hero-copy">
+                <h1>Grow in Faith.<br />Live with <em>Purpose.</em></h1>
+                <p>
+                    A welcoming digital church community where believers learn, encourage
+                    and walk with God together.
+                </p>
+                <blockquote>
+                    “As iron sharpens iron, so one person sharpens another.”
+                    <small>— Proverbs 27:17</small>
+                </blockquote>
+            </div>
+        </div>
+    </section>
+
+    <section class="auth-panel">
+        <div class="auth-card compact">
+            <h2>Create Account</h2>
+            <div class="accent"></div>
+            <p class="sub">Join believers growing together in faith.</p>
+
+            <form (ngSubmit)="submit()">
+                <label>
+                    ◯
+                    <input name="name" [(ngModel)]="name" required placeholder="Full name" />
+                </label>
+
+                <label>
+                    ✉
+                    <input name="email" [(ngModel)]="email" type="email" required placeholder="Email address" />
+                </label>
+
+                <label>
+                    ♙
+                    <input name="password" [(ngModel)]="password" type="password" required minlength="8"
+                        placeholder="Password (8+ characters)" />
+                </label>
+
+                <label>
+                    ♙
+                    <input name="confirm" [(ngModel)]="confirm" type="password" required
+                        placeholder="Confirm password" />
+                </label>
+
+                <label class="check terms">
+                    <input type="checkbox" [(ngModel)]="agree" name="agree" />
+                    I agree to the community guidelines and privacy policy.
+                </label>
+
+                <div class="error" *ngIf="error()">{{ error() }}</div>
+
+                <button class="primary" [disabled]="busy()">
+                    {{ busy() ? 'Creating...' : 'Create Account →' }}
+                </button>
+            </form>
+
+            <p class="signup-line">
+                Already have an account? <a routerLink="/login">Log In</a>
+            </p>
+        </div>
+    </section>
+</div>

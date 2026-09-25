@@ -1,0 +1,97 @@
+# ============================================================
+# Node / Angular
+# ============================================================
+
+# Dependencies
+/node_modules
+/npm-debug.log*
+/yarn-error.log
+/pnpm-debug.log*
+
+# Build outputs
+/dist
+/out-tsc
+/bazel-out
+/.angular/cache
+/.angular/
+.angular/
+
+# Angular CLI temp
+/.sass-cache
+/connect.lock
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+
+# Compiled output
+*.tsbuildinfo
+
+# ============================================================
+# Editors & OS
+# ============================================================
+
+# VS Code
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/*.code-snippets
+
+# JetBrains (IntelliJ / WebStorm)
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# Sublime
+*.sublime-workspace
+
+# Vim
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ============================================================
+# Environment / Secrets — NEVER commit
+# ============================================================
+
+.env
+.env.*
+!.env.example
+
+# ============================================================
+# Misc
+# ============================================================
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Logs
+logs
+*.log
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# ============================================================
+# Project-specific
+# ============================================================
+
+# Generated report output
+/reports
+/coverage

@@ -1,0 +1,343 @@
+.page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-bottom: 22px;
+}
+
+.eyebrow {
+    font-size: 10px;
+    letter-spacing: 2px;
+    font-weight: 800;
+    color: #8b42c9;
+}
+
+.page-head h1 {
+    font: 700 28px Georgia, serif;
+    margin: 6px 0;
+    color: #2a1740;
+}
+
+.page-head p {
+    color: #7b7188;
+    margin: 0;
+    font-size: 14px;
+}
+
+/* ---------- Filters ---------- */
+
+.filters {
+    display: grid;
+    grid-template-columns:
+        minmax(220px, 1.4fr) minmax(180px, 1fr) 150px 150px 150px auto auto;
+    gap: 10px;
+    margin-bottom: 20px;
+
+    input,
+    select {
+        height: 42px;
+        border: 1px solid #e2d9ec;
+        border-radius: 10px;
+        padding: 0 14px;
+        font-size: 13px;
+        background: #fff;
+        color: #2a1740;
+        outline: none;
+
+        &:focus {
+            border-color: #8a31cf;
+            box-shadow: 0 0 0 3px #8a31cf22;
+        }
+    }
+}
+
+.btn {
+    height: 42px;
+    border: 0;
+    border-radius: 10px;
+    padding: 0 18px;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+
+    &.primary {
+        background: linear-gradient(90deg, #8a31cf, #4e177e);
+        color: #fff;
+    }
+
+    &.ghost {
+        background: #f3eafb;
+        color: #6d22a4;
+    }
+
+    &:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+}
+
+.card {
+    background: #fff;
+    border: 1px solid #eee6f4;
+    border-radius: 16px;
+    padding: 12px 20px 20px;
+    box-shadow: 0 8px 30px rgba(54, 22, 78, .04);
+
+    &.error {
+        color: #9f2440;
+        background: #fff0f2;
+        border-color: #f1c7cf;
+    }
+}
+
+/* ---------- Table ---------- */
+
+.table-wrap {
+    overflow-x: auto;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+
+    th {
+        text-align: left;
+        font-size: 10px;
+        letter-spacing: 1.4px;
+        font-weight: 800;
+        color: #8b42c9;
+        text-transform: uppercase;
+        padding: 14px 10px;
+        border-bottom: 1px solid #f0ebf4;
+        background: #fff;
+        position: sticky;
+        top: 0;
+    }
+}
+
+.expand-col {
+    width: 32px;
+}
+
+tr.row {
+    cursor: pointer;
+    transition: background .1s;
+
+    &:hover {
+        background: #faf8fc;
+    }
+}
+
+td {
+    padding: 14px 10px;
+    border-bottom: 1px solid #f6f1fa;
+    color: #3a2a4a;
+    vertical-align: middle;
+}
+
+.chevron {
+    display: inline-block;
+    color: #8b42c9;
+    font-size: 14px;
+    transition: transform .15s;
+
+    &.open {
+        transform: rotate(90deg);
+    }
+}
+
+.time-cell {
+    strong {
+        display: block;
+        font-size: 13px;
+        color: #2a1740;
+    }
+
+    small {
+        display: block;
+        font-size: 10px;
+        color: #8c8295;
+        margin-top: 2px;
+    }
+}
+
+.actor-cell {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #9d43d7, #63319a);
+        color: #fff;
+        font-weight: 800;
+        font-size: 12px;
+        display: grid;
+        place-items: center;
+        flex-shrink: 0;
+    }
+
+    strong {
+        display: block;
+        font-size: 13px;
+        color: #2a1740;
+    }
+
+    .role-tag {
+        display: inline-block;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: #8b42c9;
+        background: #f3eafb;
+        padding: 1px 6px;
+        border-radius: 6px;
+        margin-top: 2px;
+    }
+}
+
+.action-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    padding: 5px 10px;
+    border-radius: 8px;
+    white-space: nowrap;
+
+    &.tone-success {
+        background: #e7f8ef;
+        color: #1f7a45;
+    }
+
+    &.tone-danger {
+        background: #fff0f2;
+        color: #9f2440;
+    }
+
+    &.tone-warn {
+        background: #fff4e0;
+        color: #a16600;
+    }
+
+    &.tone-neutral {
+        background: #f3eafb;
+        color: #6d22a4;
+    }
+}
+
+.target-cell {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+
+    .target-type {
+        display: inline-block;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        color: #5b3a70;
+        background: #f0ebf4;
+        padding: 3px 8px;
+        border-radius: 6px;
+        align-self: flex-start;
+    }
+
+    .target-id {
+        font-family: 'Courier New', monospace;
+        font-size: 10px;
+        color: #8c8295;
+    }
+}
+
+.result-badge {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 10px;
+
+    &.success {
+        background: #e7f8ef;
+        color: #1f7a45;
+    }
+
+    &.failed {
+        background: #fff0f2;
+        color: #9f2440;
+    }
+}
+
+.muted {
+    color: #b8a8c2;
+}
+
+/* ---------- Expanded detail ---------- */
+
+.detail-row td {
+    background: #faf8fc;
+    padding: 0;
+}
+
+.detail {
+    padding: 18px 22px 20px 50px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 18px 24px;
+    border-bottom: 1px solid #f0ebf4;
+}
+
+.detail-col {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    .label {
+        font-size: 9px;
+        letter-spacing: 1.6px;
+        font-weight: 800;
+        color: #8b42c9;
+        text-transform: uppercase;
+    }
+
+    .reason {
+        margin: 0;
+        color: #3a2a4a;
+        font-size: 13px;
+        line-height: 1.5;
+    }
+
+    .mono {
+        margin: 0;
+        font-family: 'Courier New', monospace;
+        font-size: 12px;
+        color: #5b3a70;
+        word-break: break-all;
+    }
+}
+
+.empty {
+    text-align: center;
+    color: #8c8295;
+    padding: 40px;
+}
+
+/* ---------- Pagination ---------- */
+
+.pagination {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 18px;
+    font-size: 13px;
+    color: #7b7188;
+
+    .pager {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+}

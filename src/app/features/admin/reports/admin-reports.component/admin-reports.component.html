@@ -1,0 +1,181 @@
+<section class="page-head">
+  <div>
+    <span class="eyebrow">REPORTS</span>
+    <h1>Moderation Queue</h1>
+    <p>Review community reports and take action.</p>
+  </div>
+  <button class="btn ghost" (click)="load()">Refresh</button>
+</section>
+
+@if (actionMessage()) {
+  <div class="toast">{{ actionMessage() }}</div>
+}
+
+<!-- Filters -->
+<div class="filters">
+  <select [(ngModel)]="statusFilter">
+    <option value="ALL">All statuses</option>
+    <option value="OPEN">Open</option>
+    <option value="UNDER_REVIEW">Under Review</option>
+    <option value="RESOLVED">Resolved</option>
+    <option value="DISMISSED">Dismissed</option>
+  </select>
+
+  <select [(ngModel)]="targetFilter">
+    <option value="ALL">All targets</option>
+    <option value="POST">Posts</option>
+    <option value="COMMENT">Comments</option>
+    <option value="USER">Users</option>
+  </select>
+
+  <button class="btn primary" (click)="applyFilters()">Apply</button>
+  <button class="btn ghost" (click)="clearFilters()">Reset</button>
+</div>
+
+@if (loading()) {
+  <div class="card">Loading reports…</div>
+} @else if (error()) {
+  <div class="card error">{{ error() }}</div>
+} @else if (reports().length === 0) {
+  <div class="card empty-state">
+    <div class="empty-icon">✓</div>
+    <h3>Queue is clear</h3>
+    <p>No reports match the current filters.</p>
+  </div>
+} @else {
+
+  <div class="report-list">
+    @for (report of reports(); track report.id) {
+      <article class="report-card" [class.resolved]="report.status !== 'OPEN' && report.status !== 'UNDER_REVIEW'">
+
+        <div class="card-head">
+          <div class="avatar">{{ report.reporterName.charAt(0) }}</div>
+          <div class="head-info">
+            <strong>{{ report.reporterName }}</strong>
+            <small>Reported {{ report.createdAt | date:'medium' }}</small>
+          </div>
+          <span class="badge target-{{ targetTone(report.targetType) }}">
+            {{ report.targetType }}
+          </span>
+          <span class="badge status-{{ statusTone(report.status) }}">
+            {{ report.status.replace('_', ' ') }}
+          </span>
+        </div>
+
+        <div class="card-body">
+
+          <div class="field">
+            <span class="label">Reason</span>
+            <p class="reason">{{ reasonLabel(report.reason) }}</p>
+          </div>
+
+          @if (report.details) {
+            <div class="field">
+              <span class="label">Details</span>
+              <p class="details">{{ report.details }}</p>
+            </div>
+          }
+
+          <div class="field">
+            <span class="label">Target ID</span>
+            <p class="mono">{{ report.targetId }}</p>
+          </div>
+
+          @if (report.status === 'RESOLVED' || report.status === 'DISMISSED') {
+            <div class="resolution-block">
+              <span class="label">Resolved</span>
+              <p>
+                <strong>{{ report.status }}</strong>
+                @if (report.resolvedAt) {
+                  · {{ report.resolvedAt | date:'medium' }}
+                }
+              </p>
+              @if (report.resolutionNote) {
+                <p class="note">{{ report.resolutionNote }}</p>
+              }
+            </div>
+          }
+
+        </div>
+
+        @if (report.status === 'OPEN' || report.status === 'UNDER_REVIEW') {
+          <div class="card-actions">
+            <button
+              class="btn ghost"
+              [disabled]="actionBusy() === report.id"
+              (click)="openResolveDialog(report, 'DISMISSED')">
+              Dismiss
+            </button>
+            <button
+              class="btn warn"
+              [disabled]="actionBusy() === report.id"
+              (click)="openResolveDialog(report, 'UNDER_REVIEW')">
+              Mark Under Review
+            </button>
+            <button
+              class="btn primary"
+              [disabled]="actionBusy() === report.id"
+              (click)="openResolveDialog(report, 'RESOLVED')">
+              Resolve
+            </button>
+          </div>
+        }
+
+      </article>
+    }
+  </div>
+
+  <div class="card pagination-card">
+    <div class="pagination">
+      <span>{{ totalElements() }} report{{ totalElements() === 1 ? '' : 's' }}</span>
+      <div class="pager">
+        <button class="btn ghost" [disabled]="page() === 0" (click)="prevPage()">← Prev</button>
+        <span>Page {{ page() + 1 }} of {{ totalPages() || 1 }}</span>
+        <button class="btn ghost" [disabled]="page() + 1 >= totalPages()" (click)="nextPage()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+}
+
+<!-- Resolve dialog -->
+@if (resolveDialogFor(); as report) {
+  <div class="dialog-backdrop" (click)="cancelResolve()"></div>
+  <div class="dialog">
+    <h3>
+      @if (resolveDecision === 'RESOLVED') {
+        Resolve this report?
+      } @else if (resolveDecision === 'DISMISSED') {
+        Dismiss this report?
+      } @else {
+        Mark under review?
+      }
+    </h3>
+    <p class="dialog-sub">
+      {{ report.targetType }} reported by <strong>{{ report.reporterName }}</strong>
+    </p>
+
+    <label>
+      Note
+      @if (resolveDecision === 'RESOLVED') {
+        <span class="required">(recommended — appears in audit trail)</span>
+      } @else {
+        <span class="optional">(optional)</span>
+      }
+      <textarea
+        rows="3"
+        [(ngModel)]="resolveNote"
+        [placeholder]="resolveDecision === 'RESOLVED' ? 'What action was taken?' : 'Why is this being ' + resolveDecision.toLowerCase() + '?'"></textarea>
+    </label>
+
+    <div class="dialog-actions">
+      <button class="btn ghost" (click)="cancelResolve()">Cancel</button>
+      <button
+        [class]="resolveDecision === 'DISMISSED' ? 'btn ghost' : 'btn primary'"
+        [disabled]="actionBusy() === report.id"
+        (click)="confirmResolve()">
+        {{ actionBusy() === report.id ? 'Processing…' : 'Confirm' }}
+      </button>
+    </div>
+  </div>
+}

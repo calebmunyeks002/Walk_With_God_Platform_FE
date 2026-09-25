@@ -1,0 +1,126 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">BIBLE TRIVIA — ANALYTICS</span>
+        <h1>Daily Trivia Activity</h1>
+        <p>See who completed today's quizzes, their scores, and pass rates.</p>
+    </div>
+    <input type="date" [(ngModel)]="dateFilter" (change)="applyFilters()" class="date-picker" />
+</section>
+
+@if (overview(); as o) {
+<div class="stat-grid">
+    <div class="stat-card">
+        <span class="label">Sessions Today</span>
+        <b>{{ o.totalSessions }}</b>
+    </div>
+    <div class="stat-card">
+        <span class="label">Completed</span>
+        <b>{{ o.completedSessions }}</b>
+        <small>{{ pct(o.completionRate) }} rate</small>
+    </div>
+    <div class="stat-card">
+        <span class="label">Passed</span>
+        <b>{{ o.passedSessions }}</b>
+        <small>{{ pct(o.passRate) }} of completed</small>
+    </div>
+    <div class="stat-card">
+        <span class="label">Average Score</span>
+        <b>{{ pct(o.avgScoreRatio) }}</b>
+    </div>
+</div>
+}
+
+<div class="filters">
+    <select [(ngModel)]="difficultyFilter">
+        <option value="ALL">All difficulties</option>
+        <option value="EASY">Easy</option>
+        <option value="MEDIUM">Medium</option>
+        <option value="HARD">Hard</option>
+    </select>
+
+    <select [(ngModel)]="statusFilter">
+        <option value="ALL">All statuses</option>
+        <option value="COMPLETED">Completed</option>
+        <option value="PENDING">Not started</option>
+    </select>
+
+    <select [(ngModel)]="passFilter">
+        <option value="ALL">Pass / Fail — both</option>
+        <option value="PASSED">Passed</option>
+        <option value="FAILED">Failed</option>
+    </select>
+
+    <input type="text" placeholder="Search user name or email…" [(ngModel)]="searchText" />
+
+    <button class="btn primary" (click)="applyFilters()">Apply</button>
+    <button class="btn ghost" (click)="clearFilters()">Clear</button>
+</div>
+
+@if (loading()) {
+<div class="card">Loading…</div>
+} @else if (error()) {
+<div class="card error">{{ error() }}</div>
+} @else if (sessions().length === 0) {
+<div class="card empty">
+    <p>No trivia sessions for this date.</p>
+    <small>Try a different date or clear filters.</small>
+</div>
+} @else {
+<div class="card">
+    <table>
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Difficulty</th>
+                <th>Status</th>
+                <th>Score</th>
+                <th>Result</th>
+                <th>Completed</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (s of sessions(); track s.id) {
+            <tr>
+                <td>
+                    <strong>{{ s.userName }}</strong>
+                    <small>{{ s.userEmail }}</small>
+                </td>
+                <td><span class="diff" [class]="'d-' + s.difficulty.toLowerCase()">{{ s.difficulty }}</span></td>
+                <td>
+                    @if (s.completed) {
+                    <span class="pill completed">Completed</span>
+                    } @else {
+                    <span class="pill pending">Pending</span>
+                    }
+                </td>
+                <td>
+                    @if (s.completed) {
+                    <b>{{ s.score }}/{{ s.total }}</b>
+                    } @else {
+                    <span class="muted">—</span>
+                    }
+                </td>
+                <td>
+                    @if (s.completed) {
+                    @if (s.passed) {
+                    <span class="pill passed">Passed</span>
+                    } @else {
+                    <span class="pill failed">Failed</span>
+                    }
+                    } @else {
+                    <span class="muted">—</span>
+                    }
+                </td>
+                <td class="time">{{ s.completedAt | date:'short' }}</td>
+            </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="pager">
+        <button class="btn ghost" [disabled]="page() === 0" (click)="prevPage()">← Prev</button>
+        <span>{{ totalElements() }} total · Page {{ page() + 1 }} of {{ totalPages() || 1 }}</span>
+        <button class="btn ghost" [disabled]="page() + 1 >= totalPages()" (click)="nextPage()">Next →</button>
+    </div>
+</div>
+}

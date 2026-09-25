@@ -1,0 +1,61 @@
+@if (call.activeCall(); as c) {
+<div class="call-overlay" [class.video]="c.mediaType === 'VIDEO'">
+
+    <!-- INCOMING ring -->
+    @if (c.phase === 'INCOMING_RINGING') {
+    <div class="ring-card">
+        <div class="avatar">{{ c.peerName.charAt(0) }}</div>
+        <h2>{{ c.peerName }}</h2>
+        <p class="ring-sub">
+            Incoming {{ c.mediaType === 'VIDEO' ? 'video' : 'voice' }} call…
+        </p>
+        <div class="ring-actions">
+            <button class="circle-btn decline" (click)="decline()" title="Decline">✕</button>
+            <button class="circle-btn accept" (click)="accept()" title="Accept">✓</button>
+        </div>
+    </div>
+    }
+
+    <!-- OUTGOING ring / CONNECTING -->
+    @if (c.phase === 'OUTGOING_RINGING' || c.phase === 'CONNECTING') {
+    <div class="ring-card">
+        <div class="avatar pulsing">{{ c.peerName.charAt(0) }}</div>
+        <h2>{{ c.peerName }}</h2>
+        <p class="ring-sub">
+            {{ c.phase === 'CONNECTING' ? 'Connecting…' : 'Ringing…' }}
+        </p>
+        <div class="ring-actions">
+            <button class="circle-btn decline" (click)="hangup()" title="Cancel">✕</button>
+        </div>
+    </div>
+    }
+
+    <!-- CONNECTED -->
+    @if (c.phase === 'CONNECTED') {
+    <div class="video-grid">
+        <video #remoteVideo class="remote-video" autoplay playsinline></video>
+        <video #localVideo class="local-video" autoplay playsinline muted></video>
+    </div>
+
+    <div class="call-controls">
+        <div class="peer-name">
+            {{ c.peerName }} · {{ duration() }}
+        </div>
+        <div class="control-buttons">
+            <button class="ctrl-btn" [class.active]="c.muted" (click)="toggleMute()"
+                [title]="c.muted ? 'Unmute' : 'Mute'">
+                {{ c.muted ? '🔇' : '🎤' }}
+            </button>
+            @if (c.mediaType === 'VIDEO') {
+            <button class="ctrl-btn" [class.active]="c.cameraOff" (click)="toggleCamera()"
+                [title]="c.cameraOff ? 'Turn camera on' : 'Turn camera off'">
+                {{ c.cameraOff ? '📷' : '📹' }}
+            </button>
+            }
+            <button class="ctrl-btn decline" (click)="hangup()" title="Hang up">✕</button>
+        </div>
+    </div>
+    }
+
+</div>
+}

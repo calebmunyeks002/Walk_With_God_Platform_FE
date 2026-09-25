@@ -1,0 +1,149 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">MENTORSHIP</span>
+        <h1>Mentorship Requests</h1>
+        <p>Review and respond to believers seeking guidance.</p>
+    </div>
+    <button class="btn ghost" (click)="load()">Refresh</button>
+</section>
+
+@if (actionMessage()) {
+<div class="toast">{{ actionMessage() }}</div>
+}
+
+<!-- Summary pills -->
+<div class="summary">
+    <button class="pill" [class.active]="statusFilter === 'PENDING'" (click)="statusFilter = 'PENDING'">
+        <span class="pill-count">{{ counts().pending }}</span>
+        <span class="pill-label">Pending</span>
+    </button>
+    <button class="pill" [class.active]="statusFilter === 'ACCEPTED'" (click)="statusFilter = 'ACCEPTED'">
+        <span class="pill-count">{{ counts().accepted }}</span>
+        <span class="pill-label">Accepted</span>
+    </button>
+    <button class="pill" [class.active]="statusFilter === 'DECLINED'" (click)="statusFilter = 'DECLINED'">
+        <span class="pill-count">{{ counts().declined }}</span>
+        <span class="pill-label">Declined</span>
+    </button>
+    <button class="pill" [class.active]="statusFilter === 'COMPLETED'" (click)="statusFilter = 'COMPLETED'">
+        <span class="pill-count">{{ counts().completed }}</span>
+        <span class="pill-label">Completed</span>
+    </button>
+    <button class="pill" [class.active]="statusFilter === 'ALL'" (click)="statusFilter = 'ALL'">
+        <span class="pill-count">{{ allRequests().length }}</span>
+        <span class="pill-label">All</span>
+    </button>
+</div>
+
+<!-- Filters -->
+<div class="filters">
+    <input type="text" placeholder="Search by name, email, or message…" [(ngModel)]="searchText" />
+
+    <select [(ngModel)]="sortBy">
+        <option value="NEWEST">Newest first</option>
+        <option value="OLDEST">Oldest first</option>
+        <option value="NAME">Name A-Z</option>
+    </select>
+</div>
+
+@if (loading()) {
+<div class="card">Loading requests…</div>
+} @else if (error()) {
+<div class="card error">{{ error() }}</div>
+} @else if (visibleRequests().length === 0) {
+<div class="card empty-state">
+    <div class="empty-icon">✓</div>
+    <h3>No requests to show</h3>
+    <p>Try changing filters or come back later.</p>
+</div>
+} @else {
+
+<div class="request-list">
+    @for (r of visibleRequests(); track r.id) {
+    <article class="request-card">
+
+        <div class="card-head">
+            <div class="avatar">{{ r.member.name.charAt(0) }}</div>
+            <div class="head-info">
+                <strong>{{ r.member.name }}</strong>
+                <small>{{ r.member.email }}</small>
+            </div>
+            <span class="badge" [class]="statusBadgeClass(r.status)">
+                {{ r.status }}
+            </span>
+            <span class="time">{{ timeAgo(r.createdAt) }}</span>
+        </div>
+
+        @if (r.message) {
+        <div class="card-body">
+            <span class="label">Message</span>
+            <p class="message">{{ r.message }}</p>
+        </div>
+        }
+
+        @if (r.responseNote) {
+        <div class="response-note">
+            <span class="label">Your response</span>
+            <p>{{ r.responseNote }}</p>
+        </div>
+        }
+
+        @if (r.status === 'PENDING') {
+        <div class="card-actions">
+            <button class="btn ghost danger" [disabled]="actionBusy() === r.id" (click)="openDeclineDialog(r)">
+                Decline
+            </button>
+            <button class="btn primary" [disabled]="actionBusy() === r.id" (click)="openAcceptDialog(r)">
+                Accept
+            </button>
+        </div>
+        }
+
+    </article>
+    }
+</div>
+
+}
+
+<!-- Accept dialog -->
+@if (acceptDialogFor(); as req) {
+<div class="dialog-backdrop" (click)="cancelAccept()"></div>
+<div class="dialog">
+    <h3>Accept {{ req.member.name }}?</h3>
+    <p class="dialog-sub">
+        They will appear in your mentees list. You can add an optional welcome note.
+    </p>
+    <label>
+        Welcome note <span class="optional">(optional)</span>
+        <textarea rows="3" [(ngModel)]="acceptNote" placeholder="Say hi and let them know what to expect…"></textarea>
+    </label>
+    <div class="dialog-actions">
+        <button class="btn ghost" (click)="cancelAccept()">Cancel</button>
+        <button class="btn primary" [disabled]="actionBusy() === req.id" (click)="confirmAccept()">
+            {{ actionBusy() === req.id ? 'Accepting…' : 'Confirm Accept' }}
+        </button>
+    </div>
+</div>
+}
+
+<!-- Decline dialog -->
+@if (declineDialogFor(); as req) {
+<div class="dialog-backdrop" (click)="cancelDecline()"></div>
+<div class="dialog">
+    <h3>Decline {{ req.member.name }}?</h3>
+    <p class="dialog-sub">
+        Please share a reason — it helps them find the right mentor.
+    </p>
+    <label>
+        Reason <span class="required">(required)</span>
+        <textarea rows="3" [(ngModel)]="declineReason" placeholder="e.g., I'm at capacity right now…"></textarea>
+    </label>
+    <div class="dialog-actions">
+        <button class="btn ghost" (click)="cancelDecline()">Cancel</button>
+        <button class="btn danger" [disabled]="!declineReason.trim() || actionBusy() === req.id"
+            (click)="confirmDecline()">
+            {{ actionBusy() === req.id ? 'Declining…' : 'Confirm Decline' }}
+        </button>
+    </div>
+</div>
+}

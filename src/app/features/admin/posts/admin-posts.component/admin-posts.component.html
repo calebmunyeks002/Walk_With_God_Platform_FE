@@ -1,0 +1,127 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">CONTENT MODERATION</span>
+        <h1>Posts</h1>
+        <p>Review, hide, and restore community posts.</p>
+    </div>
+    <button class="btn ghost" (click)="load()">Refresh</button>
+</section>
+
+@if (actionMessage()) {
+<div class="toast">{{ actionMessage() }}</div>
+}
+
+<!-- Filters -->
+<div class="filters">
+    <input type="text" placeholder="Search post content…" [(ngModel)]="searchText" (keyup.enter)="applyFilters()" />
+
+    <select [(ngModel)]="visibilityFilter">
+        <option value="ALL">All posts</option>
+        <option value="VISIBLE">Visible only</option>
+        <option value="HIDDEN">Hidden only</option>
+    </select>
+
+    <button class="btn primary" (click)="applyFilters()">Apply</button>
+    <button class="btn ghost" (click)="clearFilters()">Clear</button>
+</div>
+
+@if (loading()) {
+<div class="card">Loading posts…</div>
+} @else if (error()) {
+<div class="card error">{{ error() }}</div>
+} @else if (posts().length === 0) {
+<div class="card empty-state">
+    <div class="empty-icon">✦</div>
+    <h3>No posts match these filters</h3>
+    <p>Try changing the filter or clearing search.</p>
+</div>
+} @else {
+
+<div class="post-list">
+    @for (post of posts(); track post.id) {
+    <article class="post-card" [class.hidden]="post.hidden">
+
+        <div class="card-head">
+            <div class="avatar">{{ post.authorName.charAt(0) }}</div>
+            <div class="head-info">
+                <strong>{{ post.authorName }}</strong>
+                <small>{{ post.authorEmail }} · {{ post.createdAt | date:'medium' }}</small>
+            </div>
+            @if (post.hidden) {
+            <span class="badge hidden-badge" [title]="post.hiddenReason || 'Hidden'">
+                HIDDEN
+            </span>
+            } @else {
+            <span class="badge visible-badge">VISIBLE</span>
+            }
+            @if (post.reportCount > 0) {
+            <span class="badge report-badge">{{ post.reportCount }} report{{ post.reportCount === 1 ? '' : 's' }}</span>
+            }
+        </div>
+
+        <div class="card-body">
+            <p class="content">{{ preview(post.content) }}</p>
+            @if (post.scriptureReference) {
+            <span class="scripture">✝ {{ post.scriptureReference }}</span>
+            }
+            @if (post.hiddenReason) {
+            <div class="hidden-reason">
+                <span class="label">Hidden reason</span>
+                <p>{{ post.hiddenReason }}</p>
+            </div>
+            }
+        </div>
+
+        <div class="card-actions">
+            @if (post.hidden) {
+            <button class="btn primary" [disabled]="actionBusy() === post.id" (click)="restore(post)">
+                {{ actionBusy() === post.id ? '…' : 'Restore' }}
+            </button>
+            } @else {
+            <button class="btn danger" [disabled]="actionBusy() === post.id" (click)="openDeleteDialog(post)">
+                Hide Post
+            </button>
+            }
+        </div>
+
+    </article>
+    }
+</div>
+
+<div class="card pagination-card">
+    <div class="pagination">
+        <span>{{ totalElements() }} posts</span>
+        <div class="pager">
+            <button class="btn ghost" [disabled]="page() === 0" (click)="prevPage()">← Prev</button>
+            <span>Page {{ page() + 1 }} of {{ totalPages() || 1 }}</span>
+            <button class="btn ghost" [disabled]="page() + 1 >= totalPages()" (click)="nextPage()">Next →</button>
+        </div>
+    </div>
+</div>
+
+}
+
+<!-- Hide post dialog -->
+@if (deleteDialogFor(); as post) {
+<div class="dialog-backdrop" (click)="cancelDelete()"></div>
+<div class="dialog">
+    <h3>Hide this post?</h3>
+    <p class="dialog-sub">
+        By <strong>{{ post.authorName }}</strong>
+    </p>
+    <div class="dialog-preview">
+        <p>{{ preview(post.content) }}</p>
+    </div>
+    <label>
+        Reason <span class="required">(required)</span>
+        <textarea rows="3" [(ngModel)]="deleteReason" placeholder="Why is this post being hidden?"></textarea>
+    </label>
+    <div class="dialog-actions">
+        <button class="btn ghost" (click)="cancelDelete()">Cancel</button>
+        <button class="btn danger" [disabled]="!deleteReason.trim() || actionBusy() === post.id"
+            (click)="confirmDelete()">
+            {{ actionBusy() === post.id ? 'Hiding…' : 'Confirm Hide' }}
+        </button>
+    </div>
+</div>
+}

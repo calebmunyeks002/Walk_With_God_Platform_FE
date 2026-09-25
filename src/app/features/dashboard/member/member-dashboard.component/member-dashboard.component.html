@@ -1,0 +1,159 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">WELCOME BACK</span>
+        <h1>{{ greeting() }}, {{ firstName() }} {{ greetingEmoji() }}</h1>
+        <p>Let’s walk with God together today.</p>
+    </div>
+    <a routerLink="/devotions" class="head-btn">Today’s Devotion →</a>
+</section>
+
+<div class="daily">
+    <div>
+        <span class="tag">VERSE OF THE DAY</span>
+        <h2>
+            “Be strong and courageous. Do not be afraid; do not be discouraged,
+            for the LORD your God will be with you wherever you go.”
+        </h2>
+        <p>Joshua 1:9</p>
+    </div>
+    <div class="sun">☀</div>
+</div>
+
+<div class="grid">
+    <div class="feed-card">
+        <div class="card-title">
+            <h3>Community for You</h3>
+            <a routerLink="/community">View all →</a>
+        </div>
+
+        <div class="compose">
+            <div class="avatar">{{ auth.user()?.name?.charAt(0) || 'U' }}</div>
+            <div>
+                <strong>Share something encouraging...</strong>
+                <small>Post a motivation, prayer, scripture or testimony.</small>
+            </div>
+            <a routerLink="/community">+</a>
+        </div>
+
+        @if (loading()) {
+        <div class="loading">Loading community...</div>
+        }
+
+        @for (p of posts().slice(0, 3); track p.id) {
+        <article class="post">
+            <div class="post-head">
+                <div class="avatar">{{ p.author.name.charAt(0) }}</div>
+                <div>
+                    <strong>{{ p.author.name }}</strong>
+                    <small>{{ p.createdAt | date:'medium' }}</small>
+                </div>
+            </div>
+            <p>{{ p.content }}</p>
+            @if (p.scriptureReference) {
+            <span class="scripture">✝ {{ p.scriptureReference }}</span>
+            }
+            <div class="actions">
+                <span>♡ {{ p.reactions }}</span>
+                <span>◌ {{ p.comments }}</span>
+                <span>↗ Share</span>
+            </div>
+        </article>
+        }
+
+        @if (!loading() && posts().length === 0) {
+        <div class="empty">
+            No community posts yet. Be the first to share an encouragement.
+        </div>
+        }
+    </div>
+
+    <aside class="side-grid">
+        <!-- Your Growth -->
+        <div class="mini-card">
+            <div class="card-title">
+                <h3>Your Growth</h3>
+                <a routerLink="/profile">View</a>
+            </div>
+            <div class="stats growth-stats">
+                <div><b>{{ stats().dayStreak }}</b><span>Day streak</span></div>
+                <div><b>{{ stats().chaptersRead }}</b><span>Chapters</span></div>
+                <div><b>{{ stats().versesRead }}</b><span>Verses</span></div>
+                <div><b>{{ stats().highlights }}</b><span>Highlights</span></div>
+            </div>
+        </div>
+
+        <!-- NEW: Knowledge Trivias -->
+        <div class="mini-card trivia">
+            <div class="card-title">
+                <h3>Knowledge Trivias</h3>
+                <a routerLink="/trivia">Play →</a>
+            </div>
+
+            <div class="trivia-summary">
+                <div class="trivia-big">
+                    <b>{{ triviaTodayCount() }}<small>/3</small></b>
+                    <span>Passed today</span>
+                </div>
+                <div class="trivia-total">
+                    <b>{{ stats().triviaPassedTotal }}</b>
+                    <span>Total passed</span>
+                </div>
+            </div>
+
+            <div class="difficulty-row">
+                <span class="diff-pill" [class.passed]="stats().triviaPassedTodayEasy">
+                    {{ stats().triviaPassedTodayEasy ? '✓' : '·' }} Easy
+                </span>
+                <span class="diff-pill" [class.passed]="stats().triviaPassedTodayMedium">
+                    {{ stats().triviaPassedTodayMedium ? '✓' : '·' }} Medium
+                </span>
+                <span class="diff-pill" [class.passed]="stats().triviaPassedTodayHard">
+                    {{ stats().triviaPassedTodayHard ? '✓' : '·' }} Hard
+                </span>
+            </div>
+
+            @if (triviaTodayCount() < 3) { <a routerLink="/trivia" class="head-btn small">
+                {{ triviaTodayCount() === 0 ? 'Start today\'s quiz' : 'Try another difficulty' }} →
+                </a>
+                } @else {
+                <div class="all-done">
+                    🎉 You've passed all three difficulties today!
+                </div>
+                }
+        </div>
+
+        <!-- Mentorship -->
+        <div class="mini-card mentor">
+            <span class="tag">MENTORSHIP</span>
+            <h3>Need someone to walk with you?</h3>
+            <p>
+                Connect with an accredited Christian mentor for prayer, accountability
+                and guidance.
+            </p>
+            <a routerLink="/mentors" class="head-btn">Find a Mentor</a>
+        </div>
+
+        <!-- Quick Journey -->
+        <div class="mini-card">
+            <div class="card-title">
+                <h3>Quick Journey</h3>
+            </div>
+            <div class="quick">
+                <a routerLink="/bible">
+                    ✝
+                    <span>
+                        <b>Read the Bible</b>
+                        <small>Continue where you left off</small>
+                    </span>
+                </a>
+                <a routerLink="/trivia">
+                    ?
+                    <span>
+                        <b>Test your Bible knowledge</b>
+                        <small>5 questions today</small>
+                    </span>
+                </a>
+            </div>
+        </div>
+    </aside>
+</div>

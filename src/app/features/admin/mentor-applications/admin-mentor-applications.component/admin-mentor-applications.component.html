@@ -1,0 +1,133 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">MENTOR APPLICATIONS</span>
+        <h1>Pending Applications</h1>
+        <p>Review qualifications and approve or reject applicants.</p>
+    </div>
+    <button class="btn ghost" (click)="load()">Refresh</button>
+</section>
+
+@if (actionMessage()) {
+<div class="toast">{{ actionMessage() }}</div>
+}
+
+@if (loading()) {
+<div class="card">Loading applications…</div>
+} @else if (error()) {
+<div class="card error">{{ error() }}</div>
+} @else if (applications().length === 0) {
+<div class="card empty-state">
+    <div class="empty-icon">✓</div>
+    <h3>All caught up</h3>
+    <p>No pending mentor applications right now.</p>
+</div>
+} @else {
+
+<div class="grid">
+    @for (app of applications(); track app.id) {
+    <div class="application-card">
+
+        <div class="card-head">
+            <div class="avatar">{{ app.name.charAt(0) }}</div>
+            <div class="head-info">
+                <strong>{{ app.name }}</strong>
+                <small>{{ app.email }}</small>
+            </div>
+            <span class="badge pending">{{ app.status }}</span>
+        </div>
+
+        <div class="card-body">
+
+            <div class="field">
+                <span class="label">Qualifications</span>
+                <p class="text">{{ app.qualifications }}</p>
+            </div>
+
+            <div class="two-col">
+                <div class="field">
+                    <span class="label">Organization</span>
+                    <p class="text">{{ app.organization || '—' }}</p>
+                </div>
+                <div class="field">
+                    <span class="label">Years of Experience</span>
+                    <p class="text"><strong>{{ app.yearsExperience }}</strong> years</p>
+                </div>
+            </div>
+
+            @if (app.documentUrl) {
+            <div class="field">
+                <span class="label">Supporting Evidence</span>
+                <button class="doc-link" (click)="openDocument(app.documentUrl)">
+                    📎 View document
+                </button>
+            </div>
+            }
+
+            <div class="field meta">
+                <span class="label">Submitted</span>
+                <small>{{ app.createdAt | date:'medium' }}</small>
+            </div>
+
+        </div>
+
+        <div class="card-actions">
+            <button class="btn danger" [disabled]="actionBusy() === app.id" (click)="openReview(app, 'REJECTED')">
+                Reject
+            </button>
+            <button class="btn primary" [disabled]="actionBusy() === app.id" (click)="openReview(app, 'APPROVED')">
+                Approve as Mentor
+            </button>
+        </div>
+
+    </div>
+    }
+</div>
+
+}
+
+<!-- Review dialog -->
+@if (reviewDialogFor(); as app) {
+<div class="dialog-backdrop" (click)="cancelReview()"></div>
+<div class="dialog">
+    <h3>
+        @if (reviewDecision === 'APPROVED') {
+        Approve {{ app.name }}?
+        } @else {
+        Reject {{ app.name }}'s application?
+        }
+    </h3>
+    <p class="dialog-sub">
+        @if (reviewDecision === 'APPROVED') {
+        This will promote <strong>{{ app.name }}</strong> to MENTOR and create a verified mentor profile.
+        } @else {
+        Their application will be marked as rejected. You can add a reason for the record.
+        }
+    </p>
+
+    <label>
+        Reason
+        @if (reviewDecision === 'REJECTED') {
+        <span class="required">(required)</span>
+        } @else {
+        <span class="optional">(optional, appears in audit trail)</span>
+        }
+        <textarea rows="3" [(ngModel)]="reviewReason"
+            [placeholder]="reviewDecision === 'APPROVED' ? 'Approved based on...' : 'Explain why this application was rejected...'"></textarea>
+    </label>
+
+    <div class="dialog-actions">
+        <button class="btn ghost" (click)="cancelReview()">Cancel</button>
+        <button [class]="reviewDecision === 'APPROVED' ? 'btn primary' : 'btn danger'"
+            [disabled]="actionBusy() === app.id || (reviewDecision === 'REJECTED' && !reviewReason.trim())"
+            (click)="confirmReview()">
+            @if (actionBusy() === app.id) {
+            Processing…
+            } @else if (reviewDecision === 'APPROVED') {
+            Confirm Approval
+            } @else {
+            Confirm Rejection
+            }
+        </button>
+    </div>
+</div>
+}

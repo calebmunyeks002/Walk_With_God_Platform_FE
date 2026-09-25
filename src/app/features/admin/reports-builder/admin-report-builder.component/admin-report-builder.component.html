@@ -1,0 +1,129 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">REPORT BUILDER</span>
+        <h1>Generate Reports</h1>
+        <p>Preview and download operational reports in CSV, Excel, or PDF.</p>
+    </div>
+</section>
+
+<div class="layout">
+
+    <!-- Config panel -->
+    <aside class="config-card">
+        <h2>Configuration</h2>
+
+        <label class="field">
+            <span class="label">Report Type</span>
+            <select [(ngModel)]="reportType">
+                @for (r of reportTypes; track r.value) {
+                <option [value]="r.value">{{ r.label }}</option>
+                }
+            </select>
+            <small class="hint">{{ selectedReportDescription() }}</small>
+        </label>
+
+        <label class="field">
+            <span class="label">Date Range</span>
+            <div class="range">
+                <input type="date" [(ngModel)]="fromDate" placeholder="From" />
+                <span class="range-sep">→</span>
+                <input type="date" [(ngModel)]="toDate" placeholder="To" />
+            </div>
+        </label>
+
+        <label class="field">
+            <span class="label">Search</span>
+            <input type="text" [(ngModel)]="searchText" placeholder="Filter rows…" />
+        </label>
+
+        <label class="field">
+            <span class="label">Export Format</span>
+            <select [(ngModel)]="format">
+                @for (f of formats; track f.value) {
+                <option [value]="f.value">{{ f.label }}</option>
+                }
+            </select>
+        </label>
+
+        <div class="actions">
+            <button class="btn ghost" (click)="clearFilters()">Clear</button>
+            <button class="btn primary" [disabled]="previewLoading()" (click)="loadPreview()">
+                {{ previewLoading() ? 'Loading…' : 'Preview' }}
+            </button>
+        </div>
+
+        <hr class="divider" />
+
+        <button class="btn download" [disabled]="downloading()" (click)="download()">
+            ⬇ Download {{ format }}
+        </button>
+
+        @if (downloadMessage()) {
+        <div class="download-msg">{{ downloadMessage() }}</div>
+        }
+
+    </aside>
+
+    <!-- Preview panel -->
+    <section class="preview-card">
+        <div class="preview-head">
+            <h2>Preview</h2>
+            @if (preview(); as p) {
+            <span class="row-count">{{ p.totalRows }} total row{{ p.totalRows === 1 ? '' : 's' }}</span>
+            }
+        </div>
+
+        @if (previewLoading()) {
+        <div class="state">Loading preview…</div>
+        } @else if (previewError()) {
+        <div class="state error">{{ previewError() }}</div>
+        } @else if (!preview()) {
+        <div class="state empty">
+            <div class="empty-icon">✦</div>
+            <h3>Choose your filters</h3>
+            <p>Click <strong>Preview</strong> to see the first 50 rows before downloading.</p>
+        </div>
+        } @else if (preview(); as p) {
+
+        <div class="preview-title">
+            <strong>{{ p.title }}</strong>
+            <small>{{ p.subtitle }}</small>
+        </div>
+
+        @if (p.rows.length === 0) {
+        <div class="state empty">
+            <h3>No data</h3>
+            <p>Try different filters or a wider date range.</p>
+        </div>
+        } @else {
+        <div class="table-wrap">
+            <table>
+                <thead>
+                    <tr>
+                        @for (col of p.columns; track col) {
+                        <th>{{ col }}</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @for (row of p.rows; track $index) {
+                    <tr>
+                        @for (cell of row; track $index) {
+                        <td>{{ cell }}</td>
+                        }
+                    </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        @if (p.totalRows > p.rows.length) {
+        <div class="more-note">
+            Showing first {{ p.rows.length }} of {{ p.totalRows }} rows. Download the file for full data.
+        </div>
+        }
+        }
+        }
+    </section>
+
+</div>

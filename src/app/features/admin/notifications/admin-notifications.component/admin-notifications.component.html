@@ -1,0 +1,212 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">NOTIFICATIONS</span>
+        <h1>Notifications Center</h1>
+        <p>Send announcements and monitor every notification delivered.</p>
+    </div>
+    <div class="head-actions">
+        <button class="btn ghost" (click)="load()">Refresh</button>
+        <button class="btn primary" (click)="openComposer()">+ Send Notification</button>
+    </div>
+</section>
+
+@if (actionMessage()) {
+<div class="toast">{{ actionMessage() }}</div>
+}
+
+<!-- Filters -->
+<div class="filters">
+    <select [(ngModel)]="typeFilter">
+        @for (t of notificationTypes; track t) {
+        <option [value]="t">{{ t === 'ALL' ? 'All types' : typeLabel(t) }}</option>
+        }
+    </select>
+
+    <select [(ngModel)]="readFilter">
+        <option value="ALL">All statuses</option>
+        <option value="UNREAD">Unread only</option>
+        <option value="READ">Read only</option>
+    </select>
+
+    <input type="text" placeholder="Search title or body…" [(ngModel)]="searchText" (keyup.enter)="applyFilters()" />
+
+    <input type="date" [(ngModel)]="fromDate" />
+    <input type="date" [(ngModel)]="toDate" />
+
+    <button class="btn primary" (click)="applyFilters()">Apply</button>
+    <button class="btn ghost" (click)="clearFilters()">Clear</button>
+</div>
+
+@if (loading()) {
+<div class="card">Loading notifications…</div>
+} @else if (error()) {
+<div class="card error">{{ error() }}</div>
+} @else if (rows().length === 0) {
+<div class="card empty-state">
+    <div class="empty-icon">🔔</div>
+    <h3>No notifications match</h3>
+    <p>Try clearing filters or send a new one.</p>
+</div>
+} @else {
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Recipient</th>
+                    <th>Title</th>
+                    <th>Read</th>
+                    <th>Email</th>
+                    <th>Sent</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (n of rows(); track n.id) {
+                <tr>
+                    <td>
+                        <span class="type-badge">
+                            {{ typeIcon(n.type) }} {{ typeLabel(n.type) }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="recipient-cell">
+                            <strong>{{ n.recipientName }}</strong>
+                            <small>{{ n.recipientEmail }}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="title-cell">
+                            <strong>{{ n.title }}</strong>
+                            @if (n.body) {
+                            <small>{{ n.body }}</small>
+                            }
+                        </div>
+                    </td>
+                    <td>
+                        @if (n.read) {
+                        <span class="badge read">Read</span>
+                        } @else {
+                        <span class="badge unread">Unread</span>
+                        }
+                    </td>
+                    <td>
+                        @if (n.emailSent) {
+                        <span class="badge email-yes">✓ Sent</span>
+                        } @else {
+                        <span class="badge email-no">—</span>
+                        }
+                    </td>
+                    <td class="time-cell">{{ n.createdAt | date:'short' }}</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <span>{{ totalElements() }} total</span>
+        <div class="pager">
+            <button class="btn ghost" [disabled]="page() === 0" (click)="prevPage()">← Prev</button>
+            <span>Page {{ page() + 1 }} of {{ totalPages() || 1 }}</span>
+            <button class="btn ghost" [disabled]="page() + 1 >= totalPages()" (click)="nextPage()">Next →</button>
+        </div>
+    </div>
+</div>
+
+}
+
+<!-- Composer dialog -->
+@if (composerOpen()) {
+<div class="dialog-backdrop" (click)="closeComposer()"></div>
+<div class="composer">
+    <header class="composer-head">
+        <h2>Send Notification</h2>
+        <button class="close-btn" (click)="closeComposer()">✕</button>
+    </header>
+
+    <div class="composer-body">
+        @if (composerError()) {
+        <div class="form-error">{{ composerError() }}</div>
+        }
+
+        <label class="field">
+            <span class="label">Send to</span>
+            <div class="segment">
+                <button type="button" class="seg-btn" [class.active]="sendTarget === 'ALL'"
+                    (click)="sendTarget = 'ALL'">
+                    Everyone
+                </button>
+                <button type="button" class="seg-btn" [class.active]="sendTarget === 'ROLE'"
+                    (click)="sendTarget = 'ROLE'">
+                    By role
+                </button>
+                <button type="button" class="seg-btn" [class.active]="sendTarget === 'USER'"
+                    (click)="sendTarget = 'USER'">
+                    Specific user
+                </button>
+            </div>
+        </label>
+
+        @if (sendTarget === 'ROLE') {
+        <label class="field">
+            <span class="label">Role</span>
+            <select [(ngModel)]="sendRole">
+                @for (r of roles; track r) {
+                <option [value]="r">{{ r }}</option>
+                }
+            </select>
+        </label>
+        }
+
+        @if (sendTarget === 'USER') {
+        <label class="field">
+            <span class="label">Search user</span>
+            <input type="text" [(ngModel)]="sendSearch" (ngModelChange)="searchUsers()"
+                placeholder="Type a name or email…" />
+
+            @if (sendSearchResults().length > 0) {
+            <div class="search-results">
+                @for (u of sendSearchResults(); track u.id) {
+                <button type="button" class="search-item" (click)="pickUser(u)">
+                    <strong>{{ u.name }}</strong>
+                    <small>{{ u.email }} · {{ u.role }}</small>
+                </button>
+                }
+            </div>
+            }
+        </label>
+        }
+
+        <label class="field">
+            <span class="label">Title</span>
+            <input type="text" [(ngModel)]="sendTitle" placeholder="e.g., Sunday Service Update" maxlength="200" />
+        </label>
+
+        <label class="field">
+            <span class="label">Message</span>
+            <textarea rows="5" [(ngModel)]="sendBody" placeholder="Write the notification body…"
+                maxlength="2000"></textarea>
+        </label>
+
+        <label class="field">
+            <span class="label">Link (optional)</span>
+            <input type="text" [(ngModel)]="sendLink" placeholder="/dashboard" maxlength="500" />
+        </label>
+
+        <label class="toggle-row">
+            <input type="checkbox" [(ngModel)]="sendEmail" />
+            <span>Also send an email to each recipient</span>
+        </label>
+
+    </div>
+
+    <footer class="composer-actions">
+        <button class="btn ghost" (click)="closeComposer()">Cancel</button>
+        <button class="btn primary" [disabled]="sending()" (click)="sendNotification()">
+            {{ sending() ? 'Sending…' : 'Send Notification' }}
+        </button>
+    </footer>
+</div>
+}

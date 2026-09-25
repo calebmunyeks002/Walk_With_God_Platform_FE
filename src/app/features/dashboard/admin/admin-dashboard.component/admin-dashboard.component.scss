@@ -1,0 +1,311 @@
+.page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: end;
+    margin-bottom: 22px
+}
+
+.eyebrow,
+.tag {
+    font-size: 10px;
+    letter-spacing: 2px;
+    font-weight: 800;
+    color: #8b42c9
+}
+
+.page-head h1 {
+    font: 700 32px Georgia, serif;
+    margin: 6px 0
+}
+
+.page-head p {
+    color: #7b7188;
+    margin: 0
+}
+
+.head-btn {
+    display: inline-block;
+    text-decoration: none;
+    background: #6d22a4;
+    color: #fff;
+    padding: 11px 16px;
+    border-radius: 11px;
+    font-weight: 800;
+    font-size: 13px
+}
+
+.daily {
+    background: linear-gradient(115deg, #5e1c91, #8739bc);
+    color: #fff;
+    border-radius: 20px;
+    padding: 28px 34px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 12px 35px #8c43b52e
+}
+
+.daily h2 {
+    font: italic 22px/1.45 Georgia, serif;
+    max-width: 900px;
+    margin: 10px 0 7px
+}
+
+.daily p {
+    margin: 0;
+    color: #eadcf5;
+    font-weight: 700
+}
+
+.sun {
+    font-size: 60px;
+    color: #ffd76c
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.7fr) minmax(280px, .9fr);
+    gap: 22px;
+    margin-top: 22px
+}
+
+.feed-card,
+.mini-card {
+    background: #fff;
+    border: 1px solid #eee6f4;
+    border-radius: 18px;
+    padding: 20px;
+    box-shadow: 0 8px 30px rgba(54, 22, 78, .04)
+}
+
+.card-title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center
+}
+
+.card-title h3 {
+    margin: 0;
+    font-size: 17px
+}
+
+.card-title a {
+    color: #7b2eb2;
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 800
+}
+
+.compose {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px;
+    background: #faf8fc;
+    border-radius: 14px;
+    margin: 16px 0
+}
+
+.avatar {
+    width: 42px;
+    height: 42px;
+    flex: none;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #9d43d7, #63319a);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    font-weight: 800
+}
+
+.compose>div {
+    flex: 1
+}
+
+.compose strong,
+.compose small {
+    display: block
+}
+
+.compose small,
+.post-head small {
+    color: #8a8095;
+    margin-top: 3px
+}
+
+.compose>a {
+    font-size: 28px;
+    color: #7d2bb0;
+    text-decoration: none
+}
+
+.post {
+    padding: 18px 0;
+    border-top: 1px solid #f0ebf4
+}
+
+.post-head {
+    display: flex;
+    gap: 11px;
+    align-items: center
+}
+
+.post-head strong,
+.post-head small {
+    display: block
+}
+
+.post p {
+    line-height: 1.55;
+    color: #493d56;
+    margin: 13px 0
+}
+
+.scripture {
+    display: inline-block;
+    padding: 7px 10px;
+    border-radius: 9px;
+    background: #f3eafb;
+    color: #6e2a9f;
+    font-size: 12px;
+    font-weight: 800
+}
+
+.actions {
+    display: flex;
+    gap: 22px;
+    color: #8a7e91;
+    font-size: 12px;
+    margin-top: 15px
+}
+
+.side-grid {
+    display: grid;
+    gap: 18px;
+    align-content: start
+}
+
+.stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 15px
+}
+
+.stats div {
+    background: #f8f5fb;
+    padding: 14px 8px;
+    border-radius: 12px;
+    text-align: center
+}
+
+.stats b,
+.stats span {
+    display: block
+}
+
+.stats b {
+    font-size: 22px;
+    color: #6e28a5
+}
+
+.stats span {
+    font-size: 10px;
+    color: #81778d;
+    margin-top: 4px
+}
+
+.mentor {
+    background: linear-gradient(145deg, #f1e5fa, #fff)
+}
+
+.mentor h3 {
+    font: 700 22px Georgia, serif;
+    line-height: 1.15
+}
+
+.mentor p {
+    color: #74697e;
+    line-height: 1.5;
+    font-size: 13px;
+    margin-bottom: 17px
+}
+
+.quick {
+    display: grid;
+    gap: 10px;
+    margin-top: 10px
+}
+
+.quick a {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    text-decoration: none;
+    color: #6c2ba0;
+    background: #faf8fc;
+    padding: 12px;
+    border-radius: 12px
+}
+
+.quick a>span:first-child {
+    font-size: 21px
+}
+
+.quick b,
+.quick small {
+    display: block
+}
+
+.quick small {
+    font-size: 10px;
+    color: #8c8292;
+    margin-top: 2px
+}
+
+.loading,
+.empty {
+    padding: 30px;
+    text-align: center;
+    color: #8c8295
+}
+
+@media(max-width:950px) {
+    .grid {
+        grid-template-columns: 1fr
+    }
+
+    .side-grid {
+        grid-template-columns: repeat(2, 1fr)
+    }
+
+    .page-head {
+        align-items: start
+    }
+
+    .daily h2 {
+        font-size: 18px
+    }
+}
+
+@media(max-width:650px) {
+    .side-grid {
+        grid-template-columns: 1fr
+    }
+
+    .page-head {
+        display: block
+    }
+
+    .head-btn {
+        margin-top: 15px
+    }
+
+    .daily {
+        padding: 22px
+    }
+
+    .sun {
+        display: none
+    }
+}

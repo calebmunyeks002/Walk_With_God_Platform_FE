@@ -1,0 +1,126 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">SCRIPTURE</span>
+        <h1>Read the Bible</h1>
+        <p>Study the Word of God in multiple translations.</p>
+    </div>
+    <div class="head-actions">
+        <button class="btn ghost" (click)="copyChapter()" title="Copy chapter">
+            📋 Copy
+        </button>
+        <button class="btn" [class.primary]="!chapterRead()" [class.success]="chapterRead()" [disabled]="readBusy()"
+            (click)="toggleChapterRead()">
+            {{ chapterRead() ? '✓ Marked as read' : '✓ Mark as read' }}
+        </button>
+    </div>
+</section>
+
+<div class="picker-bar">
+    <label class="picker">
+        <span>Version</span>
+        <select [(ngModel)]="versionId" (ngModelChange)="versionId.set($event)">
+            @for (v of versions(); track v.id) {
+            <option [value]="v.id">{{ v.label }}</option>
+            }
+        </select>
+    </label>
+
+    <label class="picker">
+        <span>Book</span>
+        <select [ngModel]="bookId()" (ngModelChange)="onBookChange($event)">
+            <optgroup label="Old Testament">
+                @for (b of otBooks; track b.id) {
+                <option [value]="b.id">{{ b.name }}</option>
+                }
+            </optgroup>
+            <optgroup label="New Testament">
+                @for (b of ntBooks; track b.id) {
+                <option [value]="b.id">{{ b.name }}</option>
+                }
+            </optgroup>
+        </select>
+    </label>
+
+    <label class="picker">
+        <span>Chapter</span>
+        <select [ngModel]="chapterNum()" (ngModelChange)="goToChapter($event)">
+            @for (n of chapterNumbers(); track n) {
+            <option [value]="n">{{ n }}</option>
+            }
+        </select>
+    </label>
+</div>
+
+<article class="reader">
+    <header class="reader-head">
+        <div>
+            <span class="eyebrow">{{ currentReference() }}</span>
+            <h2>{{ currentBook().name }} {{ chapterNum() }}</h2>
+            @if (chapterRead()) {
+            <span class="read-badge">✓ Read</span>
+            }
+        </div>
+        <div class="nav-btns">
+            <button class="nav-btn" [disabled]="isPrevDisabled()" (click)="prevChapter()">←</button>
+            <button class="nav-btn" [disabled]="isNextDisabled()" (click)="nextChapter()">→</button>
+        </div>
+    </header>
+
+    @if (loading()) {
+    <div class="reader-state">
+        <div class="spinner"></div>
+        <p>Loading {{ currentReference() }}…</p>
+    </div>
+    } @else if (error()) {
+    <div class="reader-state error">
+        <p>{{ error() }}</p>
+        <button class="btn ghost" (click)="loadChapter()">Try again</button>
+    </div>
+    } @else if (verses().length === 0) {
+    <div class="reader-state">
+        <p>No verses found.</p>
+    </div>
+    } @else {
+    <div class="verses">
+        @for (v of verses(); track v.number) {
+        <div class="verse" [style.background]="colorHex(v.highlightColor) || null">
+            <span class="verse-num">{{ v.number }}</span>
+            <p class="verse-text">{{ v.text }}</p>
+
+            <div class="verse-actions">
+                <button class="highlight-btn" [class.active]="v.highlightId" (click)="openHighlightMenu(v.number)"
+                    title="Highlight verse">
+                    🖍
+                </button>
+
+                @if (highlightMenuVerse() === v.number) {
+                <div class="highlight-menu">
+                    @for (c of highlightColors; track c.key) {
+                    <button class="color-swatch" [style.background]="c.hex"
+                        [class.selected]="v.highlightColor === c.key" (click)="applyHighlight(v.number, c.key)"
+                        [title]="c.label">
+                    </button>
+                    }
+                    @if (v.highlightId) {
+                    <button class="clear-btn" (click)="removeHighlight(v.number)" title="Remove highlight">
+                        ✕
+                    </button>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+        }
+    </div>
+
+    <footer class="reader-footer">
+        <button class="btn ghost" [disabled]="isPrevDisabled()" (click)="prevChapter()">
+            ← Previous
+        </button>
+        <span class="footer-ref">{{ currentReference() }}</span>
+        <button class="btn ghost" [disabled]="isNextDisabled()" (click)="nextChapter()">
+            Next →
+        </button>
+    </footer>
+    }
+</article>

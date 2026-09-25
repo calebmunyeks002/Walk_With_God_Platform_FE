@@ -1,0 +1,2 @@
+import {Component,inject,signal} from '@angular/core';import {CommonModule} from '@angular/common';import {ApiService} from '../../core/services/api.service';import {Devotion} from '../../core/models/models';
+@Component({standalone:true,imports:[CommonModule],templateUrl:'./devotions.component.html',styleUrl:'./devotions.scss'})export class DevotionsComponent{api=inject(ApiService);devotions=signal<Devotion[]>([]);selected=signal<Devotion|null>(null);constructor(){this.api.devotions().subscribe({next:d=>this.devotions.set(d),error:()=>this.devotions.set([])})}}

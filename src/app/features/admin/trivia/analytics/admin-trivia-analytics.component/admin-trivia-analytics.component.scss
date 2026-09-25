@@ -1,0 +1,251 @@
+.page-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 22px;
+}
+
+.eyebrow {
+    font-size: 10px;
+    letter-spacing: 2px;
+    font-weight: 800;
+    color: #8b42c9;
+}
+
+.page-head h1 {
+    font: 700 28px Georgia, serif;
+    margin: 6px 0;
+    color: #2a1740;
+}
+
+.page-head p {
+    color: #7b7188;
+    margin: 0;
+    font-size: 14px;
+}
+
+.date-picker {
+    height: 42px;
+    border: 1px solid #e2d9ec;
+    border-radius: 10px;
+    padding: 0 14px;
+    font-size: 14px;
+    background: #fff;
+    color: #2a1740;
+}
+
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-bottom: 22px;
+}
+
+.stat-card {
+    background: #fff;
+    border: 1px solid #eee6f4;
+    border-radius: 16px;
+    padding: 18px 22px;
+    box-shadow: 0 8px 30px rgba(54, 22, 78, .04);
+
+    .label {
+        font-size: 10px;
+        letter-spacing: 1.4px;
+        font-weight: 800;
+        color: #8b42c9;
+        text-transform: uppercase;
+    }
+
+    b {
+        display: block;
+        font: 700 30px Georgia, serif;
+        color: #2a1740;
+        margin-top: 6px;
+    }
+
+    small {
+        color: #8c8295;
+        font-size: 11px;
+    }
+}
+
+.filters {
+    display: grid;
+    grid-template-columns: 160px 160px 200px 1fr auto auto;
+    gap: 10px;
+    margin-bottom: 20px;
+
+    @media (max-width: 1100px) {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    input,
+    select {
+        height: 42px;
+        border: 1px solid #e2d9ec;
+        border-radius: 10px;
+        padding: 0 14px;
+        font-size: 14px;
+        background: #fff;
+        color: #2a1740;
+        outline: none;
+
+        &:focus {
+            border-color: #8a31cf;
+            box-shadow: 0 0 0 3px #8a31cf22;
+        }
+    }
+}
+
+.card {
+    background: #fff;
+    border: 1px solid #eee6f4;
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 8px 30px rgba(54, 22, 78, .04);
+
+    &.error {
+        color: #9f2440;
+        background: #fff0f2;
+        border-color: #f1c7cf;
+    }
+
+    &.empty {
+        text-align: center;
+        padding: 50px 24px;
+        color: #8c8295;
+    }
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+
+    th {
+        text-align: left;
+        font-size: 10px;
+        letter-spacing: 1.2px;
+        font-weight: 800;
+        color: #8b42c9;
+        text-transform: uppercase;
+        padding: 12px 10px;
+        border-bottom: 1px solid #f0ebf4;
+    }
+
+    td {
+        padding: 14px 10px;
+        border-bottom: 1px solid #f6f1fa;
+        color: #3a2a4a;
+        vertical-align: middle;
+    }
+
+    strong {
+        display: block;
+        font-size: 13px;
+        color: #2a1740;
+    }
+
+    small {
+        display: block;
+        color: #8c8295;
+        font-size: 11px;
+        margin-top: 2px;
+    }
+
+    .time {
+        color: #8c8295;
+        font-size: 12px;
+    }
+
+    .muted {
+        color: #b8a8c2;
+    }
+}
+
+.diff {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 8px;
+
+    &.d-easy {
+        background: #e7f8ef;
+        color: #1f7a45;
+    }
+
+    &.d-medium {
+        background: #fff4e0;
+        color: #a16600;
+    }
+
+    &.d-hard {
+        background: #fff0f2;
+        color: #9f2440;
+    }
+}
+
+.pill {
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    border-radius: 8px;
+
+    &.completed {
+        background: #e7f8ef;
+        color: #1f7a45;
+    }
+
+    &.pending {
+        background: #fff4e0;
+        color: #a16600;
+    }
+
+    &.passed {
+        background: #e7f8ef;
+        color: #1f7a45;
+    }
+
+    &.failed {
+        background: #fff0f2;
+        color: #9f2440;
+    }
+}
+
+.pager {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+    font-size: 13px;
+    color: #7b7188;
+}
+
+.btn {
+    height: 42px;
+    border: 0;
+    border-radius: 10px;
+    padding: 0 18px;
+    font-weight: 800;
+    font-size: 13px;
+    cursor: pointer;
+
+    &.primary {
+        background: linear-gradient(90deg, #8a31cf, #4e177e);
+        color: #fff;
+    }
+
+    &.ghost {
+        background: #f3eafb;
+        color: #6d22a4;
+    }
+
+    &:disabled {
+        opacity: .5;
+        cursor: not-allowed;
+    }
+}

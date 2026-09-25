@@ -1,0 +1,90 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">BIBLE TRIVIA</span>
+        <h1>Learn by exploring</h1>
+        <p>Short questions designed to make Bible study memorable.</p>
+    </div>
+
+    @if (completed() || finished()) {
+    <div class="score-badge">
+        <span>Score</span>
+        <b>{{ score() || previousScore() }}/{{ total() }}</b>
+    </div>
+    }
+</section>
+
+<!-- Difficulty selector -->
+<div class="difficulty-tabs">
+    @for (d of ['EASY', 'MEDIUM', 'HARD']; track d) {
+    <button class="diff-tab" [class.active]="difficulty() === d" (click)="selectDifficulty($any(d))">
+        {{ d }}
+    </button>
+    }
+</div>
+
+@if (loading()) {
+<div class="card state">Loading today's trivia…</div>
+} @else if (error()) {
+<div class="card state error">{{ error() }}</div>
+} @else if (questions().length === 0) {
+<div class="card state">
+    <p>No trivia questions available yet for {{ difficulty() }}.</p>
+    <small>Check back later or try a different difficulty.</small>
+</div>
+} @else {
+
+<!-- Completion banner -->
+@if ((completed() || finished()) && passed()) {
+<div class="banner success">
+    <div>
+        <b>✓ Passed — {{ score() }}/{{ total() }}</b>
+        <small>Great work! Come back tomorrow for a fresh quiz.</small>
+    </div>
+    <button class="btn ghost" (click)="retake()">Retake</button>
+</div>
+}
+@if ((completed() || finished()) && !passed()) {
+<div class="banner fail">
+    <div>
+        <b>Not quite there — {{ score() }}/{{ total() }}</b>
+        <small>You need 3 of 5 correct to pass. Give it another shot.</small>
+    </div>
+    <button class="btn primary" (click)="retake()">Retake</button>
+</div>
+}
+
+<!-- Active quiz -->
+@if (!finished() && currentQuestion(); as q) {
+<div class="card quiz-card">
+    <div class="progress">
+        <div class="bar" [style.width.%]="progressPct()"></div>
+    </div>
+
+    <div class="meta-row">
+        <span class="q-count">Question {{ currentIndex() + 1 }} of {{ questions().length }}</span>
+        <span class="diff-badge" [class]="'diff-' + q.difficulty.toLowerCase()">
+            {{ q.difficulty }}
+        </span>
+    </div>
+
+    <h2 class="q-text">{{ q.question }}</h2>
+
+    <div class="options">
+        @for (opt of q.options; track $index) {
+        <button class="option" [class.selected]="selected() === $index" [disabled]="selected() !== null"
+            (click)="pickAnswer($index)">
+            <span class="letter">{{ optionLetter($index) }}</span>
+            <span class="text">{{ opt }}</span>
+        </button>
+        }
+    </div>
+
+    <div class="actions">
+        <button class="btn primary" [disabled]="selected() === null || submitting()" (click)="next()">
+            {{ currentIndex() + 1 === questions().length ? 'Finish' : 'Next →' }}
+        </button>
+    </div>
+</div>
+}
+
+}

@@ -1,0 +1,226 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">BIBLE TRIVIA</span>
+        <h1>Trivia Questions</h1>
+        <p>Manage quiz questions, options, and difficulty levels.</p>
+    </div>
+    <div class="head-actions">
+        <button class="btn ghost" (click)="load()">Refresh</button>
+        <button class="btn primary" (click)="openCreate()">+ New Question</button>
+    </div>
+</section>
+
+@if (actionMessage()) {
+<div class="toast">{{ actionMessage() }}</div>
+}
+
+<!-- Filters -->
+<div class="filters">
+    <input type="text" placeholder="Search questions…" [(ngModel)]="searchText" (keyup.enter)="applyFilters()" />
+
+    <select [(ngModel)]="difficultyFilter">
+        <option value="ALL">All difficulties</option>
+        <option value="EASY">Easy</option>
+        <option value="MEDIUM">Medium</option>
+        <option value="HARD">Hard</option>
+    </select>
+
+    <select [(ngModel)]="visibilityFilter">
+        <option value="ALL">All visibility</option>
+        <option value="VISIBLE">Visible</option>
+        <option value="HIDDEN">Hidden</option>
+    </select>
+
+    <button class="btn primary" (click)="applyFilters()">Apply</button>
+    <button class="btn ghost" (click)="clearFilters()">Clear</button>
+</div>
+
+@if (loading()) {
+<div class="card">Loading trivia…</div>
+} @else if (error()) {
+<div class="card error">{{ error() }}</div>
+} @else if (questions().length === 0) {
+<div class="card empty-state">
+    <div class="empty-icon">?</div>
+    <h3>No questions found</h3>
+    <p>Try changing filters or create a new one.</p>
+    <button class="btn primary" (click)="openCreate()">+ Create Question</button>
+</div>
+} @else {
+
+<div class="trivia-list">
+    @for (q of questions(); track q.id) {
+    <article class="trivia-card" [class.hidden]="q.hidden">
+
+        <div class="card-head">
+            <span class="badge difficulty" [class]="difficultyClass(q.difficulty)">
+                {{ q.difficulty }}
+            </span>
+            @if (q.hidden) {
+            <span class="badge hidden-badge" [title]="q.hiddenReason || 'Hidden'">
+                HIDDEN
+            </span>
+            }
+        </div>
+
+        <div class="card-body">
+            <p class="question">{{ q.question }}</p>
+
+            <div class="options">
+                @for (opt of q.options; track $index) {
+                <div class="option" [class.correct]="$index === q.answerIndex">
+                    <span class="letter">{{ letterLabels[$index] }}</span>
+                    <span class="text">{{ opt }}</span>
+                    @if ($index === q.answerIndex) {
+                    <span class="check">✓</span>
+                    }
+                </div>
+                }
+            </div>
+
+            @if (q.explanation) {
+            <div class="explanation">
+                <span class="label">Explanation</span>
+                <p>{{ q.explanation }}</p>
+            </div>
+            }
+        </div>
+
+        @if (q.hidden && q.hiddenReason) {
+        <div class="hidden-note">
+            <span class="label">Hidden reason</span>
+            <p>{{ q.hiddenReason }}</p>
+        </div>
+        }
+
+        <div class="card-actions">
+            <button class="row-btn" [disabled]="actionBusy() === q.id" (click)="openEdit(q)">
+                Edit
+            </button>
+            @if (!q.hidden) {
+            <button class="row-btn warn" [disabled]="actionBusy() === q.id" (click)="openDeleteDialog(q)">
+                Hide
+            </button>
+            }
+        </div>
+
+    </article>
+    }
+</div>
+
+<div class="card pagination-card">
+    <div class="pagination">
+        <span>{{ totalElements() }} question{{ totalElements() === 1 ? '' : 's' }}</span>
+        <div class="pager">
+            <button class="btn ghost" [disabled]="page() === 0" (click)="prevPage()">← Prev</button>
+            <span>Page {{ page() + 1 }} of {{ totalPages() || 1 }}</span>
+            <button class="btn ghost" [disabled]="page() + 1 >= totalPages()" (click)="nextPage()">Next →</button>
+        </div>
+    </div>
+</div>
+
+}
+
+<!-- ============================================================
+     Editor Modal
+     ============================================================ -->
+@if (editorOpen()) {
+<div class="dialog-backdrop" (click)="closeEditor()"></div>
+<div class="editor-modal">
+    <header class="editor-head">
+        <h2>{{ editorEditing() ? 'Edit Question' : 'New Question' }}</h2>
+        <button class="close-btn" (click)="closeEditor()">✕</button>
+    </header>
+
+    <div class="editor-body">
+
+        @if (formError()) {
+        <div class="form-error">{{ formError() }}</div>
+        }
+
+        <label class="field">
+            <span class="label">Question</span>
+            <textarea rows="3" [(ngModel)]="form.question" placeholder="e.g. Who led the Israelites out of Egypt?"
+                maxlength="1000"></textarea>
+        </label>
+
+        <label class="field">
+            <span class="label">Difficulty</span>
+            <div class="difficulty-picker">
+                @for (d of ['EASY', 'MEDIUM', 'HARD']; track d) {
+                <button type="button" class="diff-pill" [class]="difficultyClass(d)"
+                    [class.active]="form.difficulty === d" (click)="form.difficulty = $any(d)">
+                    {{ d }}
+                </button>
+                }
+            </div>
+        </label>
+
+        <div class="field">
+            <span class="label">
+                Answer Options
+                <small class="hint">Click the radio to mark the correct answer</small>
+            </span>
+            <div class="options-editor">
+                @for (opt of form.options; track $index) {
+                <div class="option-row">
+                    <label class="radio-wrap">
+                        <input type="radio" name="answerIndex" [checked]="form.answerIndex === $index"
+                            (change)="form.answerIndex = $index" />
+                        <span class="letter">{{ letterLabels[$index] }}</span>
+                    </label>
+                    <input type="text" class="option-input" [(ngModel)]="form.options[$index]"
+                        [placeholder]="'Option ' + letterLabels[$index]" maxlength="500" />
+                    @if (form.options.length > 2) {
+                    <button type="button" class="remove-btn" (click)="removeOption($index)" title="Remove option">
+                        ✕
+                    </button>
+                    }
+                </div>
+                }
+            </div>
+            @if (form.options.length < 6) { <button type="button" class="add-option-btn" (click)="addOption()">
+                + Add option
+                </button>
+                }
+        </div>
+
+        <label class="field">
+            <span class="label">Explanation (optional)</span>
+            <textarea rows="3" [(ngModel)]="form.explanation" placeholder="Explain why the answer is correct…"
+                maxlength="1000"></textarea>
+        </label>
+
+    </div>
+
+    <footer class="editor-actions">
+        <button class="btn ghost" (click)="closeEditor()">Cancel</button>
+        <button class="btn primary" [disabled]="actionBusy() !== null" (click)="saveEditor()">
+            {{ actionBusy() !== null ? 'Saving…' : (editorEditing() ? 'Save Changes' : 'Create Question') }}
+        </button>
+    </footer>
+</div>
+}
+
+<!-- ============================================================
+     Hide dialog
+     ============================================================ -->
+@if (deleteDialogFor(); as q) {
+<div class="dialog-backdrop" (click)="cancelDelete()"></div>
+<div class="dialog">
+    <h3>Hide this question?</h3>
+    <p class="dialog-sub">{{ preview(q.question) }}</p>
+
+    <label>
+        Reason <span class="required">(required)</span>
+        <textarea rows="3" [(ngModel)]="deleteReason" placeholder="Why is this question being hidden?"></textarea>
+    </label>
+
+    <div class="dialog-actions">
+        <button class="btn ghost" (click)="cancelDelete()">Cancel</button>
+        <button class="btn danger" [disabled]="!deleteReason.trim() || actionBusy() === q.id" (click)="confirmDelete()">
+            {{ actionBusy() === q.id ? 'Hiding…' : 'Confirm Hide' }}
+        </button>
+    </div>
+</div>
+}

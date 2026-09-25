@@ -1,0 +1,80 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">MENTORSHIP</span>
+        <h1>Your Mentees</h1>
+        <p>Believers who have accepted your mentorship.</p>
+    </div>
+    <button class="btn ghost" (click)="load()">Refresh</button>
+</section>
+
+@if (actionMessage()) {
+<div class="toast">{{ actionMessage() }}</div>
+}
+
+<!-- Stats -->
+<section class="stat-grid">
+    <div class="stat-card">
+        <span class="stat-label">Active Mentees</span>
+        <b>{{ stats().active }}</b>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Completed</span>
+        <b>{{ stats().completed }}</b>
+    </div>
+    <div class="stat-card">
+        <span class="stat-label">Total</span>
+        <b>{{ stats().total }}</b>
+    </div>
+</section>
+
+<!-- Filters -->
+<div class="filters">
+    <input type="text" placeholder="Search mentees by name or email…" [(ngModel)]="searchText" />
+
+    <select [(ngModel)]="statusFilter">
+        <option value="ALL">All statuses</option>
+        <option value="ACCEPTED">Active</option>
+        <option value="COMPLETED">Completed</option>
+    </select>
+
+    <select [(ngModel)]="sortBy">
+        <option value="RECENT">Recently added</option>
+        <option value="OLDEST">Oldest first</option>
+        <option value="NAME">Name A-Z</option>
+    </select>
+</div>
+
+@if (loading()) {
+<div class="card">Loading mentees…</div>
+} @else if (error()) {
+<div class="card error">{{ error() }}</div>
+} @else if (visibleMentees().length === 0) {
+<div class="card empty-state">
+    <div class="empty-icon">✦</div>
+    <h3>No mentees yet</h3>
+    <p>When you accept a mentorship request, they'll appear here.</p>
+</div>
+} @else {
+
+<div class="mentee-grid">
+    @for (m of visibleMentees(); track m.requestId) {
+    <article class="mentee-card">
+        <div class="avatar lg">{{ m.member.name.charAt(0) }}</div>
+        <div class="info">
+            <h3>{{ m.member.name }}</h3>
+            <small>{{ m.member.email }}</small>
+            <div class="meta">
+                <span class="badge" [class]="m.status === 'ACCEPTED' ? 'status-active' : 'status-completed'">
+                    {{ m.status }}
+                </span>
+                <span class="since">Since {{ timeAgo(m.since) }}</span>
+            </div>
+        </div>
+        <a routerLink="/inbox" class="btn primary" title="Open inbox">
+            Message
+        </a>
+    </article>
+    }
+</div>
+
+}

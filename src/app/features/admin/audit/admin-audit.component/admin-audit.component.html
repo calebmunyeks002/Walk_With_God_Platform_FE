@@ -1,0 +1,144 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">AUDIT TRAIL</span>
+        <h1>System Activity Log</h1>
+        <p>Every privileged action, immutable and timestamped.</p>
+    </div>
+    <button class="btn ghost" (click)="load()">Refresh</button>
+</section>
+
+<!-- Filters -->
+<div class="filters">
+    <input type="text" placeholder="Search actor, action, reason…" [(ngModel)]="searchText" />
+
+    <select [(ngModel)]="actionFilter">
+        @for (a of actions; track a) {
+        <option [value]="a">{{ a === 'ALL' ? 'All actions' : actionLabel(a) }}</option>
+        }
+    </select>
+
+    <select [(ngModel)]="successFilter">
+        <option value="ALL">All results</option>
+        <option value="SUCCESS">Success only</option>
+        <option value="FAILED">Failed only</option>
+    </select>
+
+    <input type="date" [(ngModel)]="fromDate" placeholder="From" />
+    <input type="date" [(ngModel)]="toDate" placeholder="To" />
+
+    <button class="btn primary" (click)="applyFilters()">Apply</button>
+    <button class="btn ghost" (click)="clearFilters()">Clear</button>
+</div>
+
+@if (loading()) {
+<div class="card">Loading audit trail…</div>
+} @else if (error()) {
+<div class="card error">{{ error() }}</div>
+} @else {
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th class="expand-col"></th>
+                    <th>Time</th>
+                    <th>Actor</th>
+                    <th>Action</th>
+                    <th>Target</th>
+                    <th>Result</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (log of filteredLogs(); track log.id) {
+                <tr class="row" (click)="toggleRow(log.id)">
+                    <td class="expand-col">
+                        <span class="chevron" [class.open]="expandedRow() === log.id">▸</span>
+                    </td>
+                    <td class="time-cell">
+                        <strong>{{ log.createdAt | date:'MMM d, HH:mm' }}</strong>
+                        <small>{{ log.createdAt | date:'yyyy' }}</small>
+                    </td>
+                    <td>
+                        <div class="actor-cell">
+                            <div class="avatar">{{ (log.actorName || 'S').charAt(0) }}</div>
+                            <div>
+                                <strong>{{ log.actorName || 'System' }}</strong>
+                                @if (log.actorRole) {
+                                <small class="role-tag">{{ log.actorRole }}</small>
+                                }
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="action-badge tone-{{ actionTone(log.action) }}">
+                            {{ actionLabel(log.action) }}
+                        </span>
+                    </td>
+                    <td>
+                        @if (log.targetType) {
+                        <div class="target-cell">
+                            <span class="target-type">{{ log.targetType }}</span>
+                            @if (log.targetId) {
+                            <small class="target-id">{{ log.targetId.slice(0, 8) }}…</small>
+                            }
+                        </div>
+                        } @else {
+                        <span class="muted">—</span>
+                        }
+                    </td>
+                    <td>
+                        @if (log.success) {
+                        <span class="result-badge success">Success</span>
+                        } @else {
+                        <span class="result-badge failed">Failed</span>
+                        }
+                    </td>
+                </tr>
+
+                @if (expandedRow() === log.id) {
+                <tr class="detail-row">
+                    <td colspan="6">
+                        <div class="detail">
+                            <div class="detail-col">
+                                <span class="label">Reason / Note</span>
+                                <p class="reason">{{ log.reason || '—' }}</p>
+                            </div>
+                            <div class="detail-col">
+                                <span class="label">IP Address</span>
+                                <p class="mono">{{ log.ipAddress || '—' }}</p>
+                            </div>
+                            <div class="detail-col">
+                                <span class="label">Target ID</span>
+                                <p class="mono">{{ log.targetId || '—' }}</p>
+                            </div>
+                            <div class="detail-col">
+                                <span class="label">Log ID</span>
+                                <p class="mono">{{ log.id }}</p>
+                            </div>
+                        </div>
+                    </td>
+                </tr>
+                }
+                }
+
+                @if (filteredLogs().length === 0) {
+                <tr>
+                    <td colspan="6" class="empty">No audit entries match these filters.</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <span>{{ totalElements() }} entries</span>
+        <div class="pager">
+            <button class="btn ghost" [disabled]="page() === 0" (click)="prevPage()">← Prev</button>
+            <span>Page {{ page() + 1 }} of {{ totalPages() || 1 }}</span>
+            <button class="btn ghost" [disabled]="page() + 1 >= totalPages()" (click)="nextPage()">Next →</button>
+        </div>
+    </div>
+</div>
+
+}

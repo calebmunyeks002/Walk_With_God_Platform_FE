@@ -1,0 +1,88 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">SETTINGS</span>
+        <h1>Platform Configuration</h1>
+        <p>Control how WalkWithGod behaves across all modules.</p>
+    </div>
+    <div class="head-actions">
+        <button class="btn ghost" (click)="load()">Refresh</button>
+        @if (hasAnyDirty()) {
+        <button class="btn ghost" (click)="resetChanges()">Discard changes</button>
+        <button class="btn primary" [disabled]="saving() === '__bulk__'" (click)="saveAll()">
+            {{ saving() === '__bulk__' ? 'Saving…' : 'Save all' }}
+        </button>
+        }
+    </div>
+</section>
+
+@if (actionMessage()) {
+<div class="toast">{{ actionMessage() }}</div>
+}
+
+@if (loading()) {
+<div class="card">Loading settings…</div>
+} @else if (error()) {
+<div class="card error">{{ error() }}</div>
+} @else {
+
+<div class="settings-grid">
+    @for (cat of visibleCategories(); track cat) {
+    <section class="settings-group">
+
+        <header class="group-head">
+            <div class="group-icon">{{ categoryIcon(cat) }}</div>
+            <div class="group-info">
+                <h2>{{ categoryLabel(cat) }}</h2>
+                <p>{{ categoryDescription(cat) }}</p>
+            </div>
+        </header>
+
+        <div class="group-body">
+            @for (s of grouped()[cat]; track s.key) {
+
+            <div class="setting-row" [class.dirty]="isDirty(s)">
+                <div class="setting-info">
+                    <span class="setting-key">{{ humanKey(s.key) }}</span>
+                    <small class="setting-desc">{{ s.description }}</small>
+                </div>
+
+                <div class="setting-input">
+
+                    @if (isBoolean(s)) {
+                    <label class="toggle">
+                        <input type="checkbox" [checked]="boolValue(s)" [disabled]="saving() === s.key"
+                            (change)="toggleBoolean(s)" />
+                        <span class="slider"></span>
+                    </label>
+                    } @else if (isInt(s)) {
+                    <input type="number" [(ngModel)]="editBuffer[s.key]" [disabled]="saving() === s.key"
+                        (blur)="saveOne(s)" (keyup.enter)="saveOne(s)" />
+                    } @else {
+                    <input type="text" [(ngModel)]="editBuffer[s.key]" [disabled]="saving() === s.key"
+                        (blur)="saveOne(s)" (keyup.enter)="saveOne(s)" />
+                    }
+
+                    @if (isDirty(s)) {
+                    <span class="dirty-dot" title="Unsaved change"></span>
+                    }
+
+                    @if (saving() === s.key) {
+                    <span class="saving-note">Saving…</span>
+                    }
+
+                </div>
+            </div>
+
+            }
+        </div>
+
+    </section>
+    }
+</div>
+
+<div class="footer-note">
+    <strong>Note:</strong> Changes save instantly for booleans and on blur/Enter for text and numbers.
+    Use <em>Save all</em> to commit multiple changes at once.
+</div>
+
+}

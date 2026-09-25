@@ -1,0 +1,101 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">INBOX</span>
+        <h1>Your conversations</h1>
+        <p>Connect privately with mentors and fellow believers.</p>
+    </div>
+    <span class="ws-status" [class.online]="ws.connected()">
+        {{ ws.connected() ? '● Live' : '○ Offline' }}
+    </span>
+</section>
+
+@if (error()) {
+<div class="toast error">{{ error() }}</div>
+}
+
+<div class="inbox-grid">
+
+    <!-- Left: conversation list -->
+    <aside class="conv-list">
+        <div class="conv-search">
+            <span class="search-icon">⌕</span>
+            <input type="text" placeholder="Search messages" [(ngModel)]="searchText" />
+        </div>
+
+        @if (loadingConvos()) {
+        <div class="list-state">Loading…</div>
+        } @else if (filteredConversations().length === 0) {
+        <div class="list-state empty">
+            <p>No conversations yet.</p>
+            <small>Start one from the Mentors page.</small>
+        </div>
+        } @else {
+        @for (c of filteredConversations(); track c.id) {
+        <button class="conv-item" [class.active]="activeId() === c.id" (click)="selectConversation(c)">
+            <div class="avatar">{{ otherParticipantInitial(c) }}</div>
+            <div class="conv-info">
+                <strong>{{ otherParticipantName(c) }}</strong>
+                <small>{{ c.lastMessage || 'Start a conversation' }}</small>
+            </div>
+        </button>
+        }
+        }
+    </aside>
+
+    <!-- Right: message pane -->
+    <section class="chat-pane">
+        @if (!activeConversation()) {
+        <div class="chat-empty">
+            <p>Select a conversation to start chatting.</p>
+        </div>
+        } @else {
+        <header class="chat-head">
+            <div class="avatar">{{ otherParticipantInitial(activeConversation()!) }}</div>
+            <div>
+                <strong>{{ otherParticipantName(activeConversation()!) }}</strong>
+                <small>Private conversation</small>
+            </div>
+
+            <!-- Call action buttons -->
+            <div class="chat-head-actions">
+                <button class="icon-action" type="button" [disabled]="!canCall" (click)="startCall('AUDIO')"
+                    title="Voice call">
+                    📞
+                </button>
+                <button class="icon-action" type="button" [disabled]="!canCall" (click)="startCall('VIDEO')"
+                    title="Video call">
+                    📹
+                </button>
+            </div>
+        </header>
+
+        <div class="chat-messages">
+            @if (loadingMessages()) {
+            <div class="chat-state">Loading messages…</div>
+            } @else if (messages().length === 0) {
+            <div class="chat-state">
+                This conversation is ready. Say hello.
+            </div>
+            } @else {
+            @for (m of messages(); track m.id) {
+            <div class="bubble-row" [class.mine]="isMine(m)">
+                <div class="bubble">
+                    <p>{{ m.content }}</p>
+                    <small>{{ m.sentAt | date:'shortTime' }}</small>
+                </div>
+            </div>
+            }
+            }
+        </div>
+
+        <footer class="chat-composer">
+            <textarea rows="1" [(ngModel)]="draft" (keydown)="onEnterKey($event)"
+                placeholder="Type a message… (Enter to send, Shift+Enter for newline)"></textarea>
+            <button class="send-btn" [disabled]="!draft.trim() || sending()" (click)="send()">
+                {{ sending() ? '…' : 'Send' }}
+            </button>
+        </footer>
+        }
+    </section>
+
+</div>

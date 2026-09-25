@@ -1,0 +1,166 @@
+<section class="page-head">
+    <div>
+        <span class="eyebrow">USER MANAGEMENT</span>
+        <h1>All Users</h1>
+        <p>Search, filter, and manage every account on the platform.</p>
+    </div>
+</section>
+
+@if (actionMessage()) {
+<div class="toast">{{ actionMessage() }}</div>
+}
+
+<!-- Filters -->
+<div class="filters">
+    <input type="text" placeholder="Search by name or email…" [(ngModel)]="search" (keyup.enter)="applyFilters()" />
+
+    <select [(ngModel)]="roleFilter">
+        <option value="ALL">All roles</option>
+        <option value="MEMBER">Members</option>
+        <option value="MENTOR">Mentors</option>
+        <option value="ADMIN">Admins</option>
+    </select>
+
+    <select [(ngModel)]="statusFilter">
+        <option value="ALL">All statuses</option>
+        <option value="ACTIVE">Active</option>
+        <option value="SUSPENDED">Suspended</option>
+    </select>
+
+    <button class="btn primary" (click)="applyFilters()">Apply</button>
+    <button class="btn ghost" (click)="clearFilters()">Clear</button>
+</div>
+
+@if (loading()) {
+<div class="card">Loading users…</div>
+} @else if (error()) {
+<div class="card error">{{ error() }}</div>
+} @else {
+
+<div class="card">
+    <div class="table-wrap">
+        <table>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Status</th>
+                    <th>Joined</th>
+                    <th class="right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (u of users(); track u.id) {
+                <tr>
+                    <td>
+                        <div class="user-cell">
+                            <div class="avatar">{{ u.name.charAt(0) }}</div>
+                            <strong>{{ u.name }}</strong>
+                        </div>
+                    </td>
+                    <td>{{ u.email }}</td>
+                    <td>
+                        <span class="badge role-{{ u.role.toLowerCase() }}">{{ u.role }}</span>
+                    </td>
+                    <td>
+                        @if (u.suspended) {
+                        <span class="badge suspended" [title]="u.suspensionReason || 'Suspended'">
+                            Suspended
+                        </span>
+                        } @else {
+                        <span class="badge active">Active</span>
+                        }
+                    </td>
+                    <td>{{ u.createdAt | date:'mediumDate' }}</td>
+                    <td class="right">
+                        @if (u.suspended) {
+                        <button class="row-btn" [disabled]="actionBusy() === u.id" (click)="reactivate(u)">
+                            {{ actionBusy() === u.id ? '…' : 'Reactivate' }}
+                        </button>
+                        } @else {
+                        <button class="row-btn warn" [disabled]="actionBusy() === u.id" (click)="openSuspendDialog(u)">
+                            Suspend
+                        </button>
+                        }
+
+                        @if (u.role !== 'MENTOR') {
+                        <button class="row-btn" (click)="openRoleDialog(u, 'MENTOR')">
+                            → Mentor
+                        </button>
+                        }
+                        @if (u.role !== 'ADMIN') {
+                        <button class="row-btn" (click)="openRoleDialog(u, 'ADMIN')">
+                            → Admin
+                        </button>
+                        }
+                        @if (u.role !== 'MEMBER') {
+                        <button class="row-btn" (click)="openRoleDialog(u, 'MEMBER')">
+                            → Member
+                        </button>
+                        }
+                    </td>
+                </tr>
+                }
+                @if (users().length === 0) {
+                <tr>
+                    <td colspan="6" class="empty">No users match these filters.</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <div class="pagination">
+        <span>{{ totalElements() }} total</span>
+        <div class="pager">
+            <button class="btn ghost" [disabled]="page() === 0" (click)="prevPage()">← Prev</button>
+            <span>Page {{ page() + 1 }} of {{ totalPages() || 1 }}</span>
+            <button class="btn ghost" [disabled]="page() + 1 >= totalPages()" (click)="nextPage()">Next →</button>
+        </div>
+    </div>
+</div>
+
+}
+
+<!-- Suspend dialog -->
+@if (suspendDialogFor(); as user) {
+<div class="dialog-backdrop" (click)="cancelSuspend()"></div>
+<div class="dialog">
+    <h3>Suspend {{ user.name }}?</h3>
+    <p class="dialog-sub">This will prevent them from signing in and hide their posts.</p>
+    <label>
+        Reason
+        <textarea rows="3" [(ngModel)]="suspendReason" placeholder="Why is this account being suspended?"></textarea>
+    </label>
+    <div class="dialog-actions">
+        <button class="btn ghost" (click)="cancelSuspend()">Cancel</button>
+        <button class="btn danger" [disabled]="!suspendReason.trim() || actionBusy() === user.id"
+            (click)="confirmSuspend()">
+            {{ actionBusy() === user.id ? 'Suspending…' : 'Confirm Suspend' }}
+        </button>
+    </div>
+</div>
+}
+
+<!-- Role change dialog -->
+@if (roleDialogFor(); as user) {
+<div class="dialog-backdrop" (click)="cancelRoleChange()"></div>
+<div class="dialog">
+    <h3>Change role: {{ user.name }}</h3>
+    <p class="dialog-sub">
+        Current role: <strong>{{ user.role }}</strong> →
+        New role: <strong>{{ roleNewValue }}</strong>
+    </p>
+    <label>
+        Reason (optional, appears in audit trail)
+        <textarea rows="3" [(ngModel)]="roleReason" placeholder="Why is the role changing?"></textarea>
+    </label>
+    <div class="dialog-actions">
+        <button class="btn ghost" (click)="cancelRoleChange()">Cancel</button>
+        <button class="btn primary" [disabled]="actionBusy() === user.id" (click)="confirmRoleChange()">
+            {{ actionBusy() === user.id ? 'Updating…' : 'Confirm' }}
+        </button>
+    </div>
+</div>
+}

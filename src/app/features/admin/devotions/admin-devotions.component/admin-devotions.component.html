@@ -1,0 +1,256 @@
+<section class="page-head">
+  <div>
+    <span class="eyebrow">DEVOTIONS</span>
+    <h1>Devotions Library</h1>
+    <p>Publish, edit, and manage daily devotions.</p>
+  </div>
+  <div class="head-actions">
+    <button class="btn ghost" (click)="load()">Refresh</button>
+    <button class="btn primary" (click)="openCreate()">+ New Devotion</button>
+  </div>
+</section>
+
+@if (actionMessage()) {
+  <div class="toast">{{ actionMessage() }}</div>
+}
+
+<!-- Filters -->
+<div class="filters">
+  <input
+    type="text"
+    placeholder="Search title or scripture…"
+    [(ngModel)]="searchText"
+    (keyup.enter)="applyFilters()" />
+
+  <select [(ngModel)]="publishedFilter">
+    <option value="ALL">All statuses</option>
+    <option value="PUBLISHED">Published</option>
+    <option value="DRAFT">Drafts</option>
+  </select>
+
+  <select [(ngModel)]="visibilityFilter">
+    <option value="ALL">All visibility</option>
+    <option value="VISIBLE">Visible</option>
+    <option value="HIDDEN">Hidden</option>
+  </select>
+
+  <select [(ngModel)]="featuredFilter">
+    <option value="ALL">Any featured status</option>
+    <option value="FEATURED">Featured only</option>
+    <option value="NORMAL">Not featured</option>
+  </select>
+
+  <button class="btn primary" (click)="applyFilters()">Apply</button>
+  <button class="btn ghost" (click)="clearFilters()">Clear</button>
+</div>
+
+@if (loading()) {
+  <div class="card">Loading devotions…</div>
+} @else if (error()) {
+  <div class="card error">{{ error() }}</div>
+} @else if (devotions().length === 0) {
+  <div class="card empty-state">
+    <div class="empty-icon">✦</div>
+    <h3>No devotions found</h3>
+    <p>Try changing the filters or create a new one.</p>
+    <button class="btn primary" (click)="openCreate()">+ Create Devotion</button>
+  </div>
+} @else {
+
+  <div class="devotion-grid">
+    @for (d of devotions(); track d.id) {
+      <article class="devotion-card" [class.hidden]="d.hidden">
+
+        <div class="card-top">
+          @if (d.featured) {
+            <span class="badge featured">★ FEATURED</span>
+          }
+          @if (d.hidden) {
+            <span class="badge hidden-badge">HIDDEN</span>
+          } @else if (!d.published) {
+            <span class="badge draft">DRAFT</span>
+          } @else {
+            <span class="badge published">PUBLISHED</span>
+          }
+        </div>
+
+        <div class="card-body">
+          <span class="scripture-chip">{{ d.scripture }}</span>
+          <h3 class="title">{{ d.title }}</h3>
+          <p class="preview">{{ preview(d.body) }}</p>
+        </div>
+
+        <div class="card-meta">
+          <div class="meta-item">
+            <span class="label">Author</span>
+            <span class="value">{{ d.authorName }}</span>
+          </div>
+          <div class="meta-item">
+            <span class="label">Published</span>
+            <span class="value">
+              {{ d.publishedAt ? (d.publishedAt | date:'mediumDate') : '—' }}
+            </span>
+          </div>
+        </div>
+
+        @if (d.hidden && d.hiddenReason) {
+          <div class="hidden-note">
+            <span class="label">Hidden reason</span>
+            <p>{{ d.hiddenReason }}</p>
+          </div>
+        }
+
+        <div class="card-actions">
+          @if (d.hidden) {
+            <button
+              class="row-btn"
+              [disabled]="actionBusy() === d.id"
+              (click)="togglePublish(d)"
+              title="Restore by re-publishing">
+              Restore
+            </button>
+          } @else {
+            <button
+              class="row-btn"
+              [disabled]="actionBusy() === d.id"
+              (click)="togglePublish(d)">
+              {{ d.published ? 'Unpublish' : 'Publish' }}
+            </button>
+            <button
+              class="row-btn"
+              [disabled]="actionBusy() === d.id"
+              (click)="toggleFeature(d)">
+              {{ d.featured ? 'Unfeature' : 'Feature' }}
+            </button>
+          }
+          <button
+            class="row-btn"
+            [disabled]="actionBusy() === d.id"
+            (click)="openEdit(d)">
+            Edit
+          </button>
+          @if (!d.hidden) {
+            <button
+              class="row-btn warn"
+              [disabled]="actionBusy() === d.id"
+              (click)="openDeleteDialog(d)">
+              Hide
+            </button>
+          }
+        </div>
+
+      </article>
+    }
+  </div>
+
+  <div class="card pagination-card">
+    <div class="pagination">
+      <span>{{ totalElements() }} devotion{{ totalElements() === 1 ? '' : 's' }}</span>
+      <div class="pager">
+        <button class="btn ghost" [disabled]="page() === 0" (click)="prevPage()">← Prev</button>
+        <span>Page {{ page() + 1 }} of {{ totalPages() || 1 }}</span>
+        <button class="btn ghost" [disabled]="page() + 1 >= totalPages()" (click)="nextPage()">Next →</button>
+      </div>
+    </div>
+  </div>
+
+}
+
+<!-- ============================================================
+     Editor Modal
+     ============================================================ -->
+@if (editorOpen()) {
+  <div class="dialog-backdrop" (click)="closeEditor()"></div>
+  <div class="editor-modal">
+    <header class="editor-head">
+      <h2>{{ editorEditing() ? 'Edit Devotion' : 'New Devotion' }}</h2>
+      <button class="close-btn" (click)="closeEditor()">✕</button>
+    </header>
+
+    <div class="editor-body">
+
+      @if (formError()) {
+        <div class="form-error">{{ formError() }}</div>
+      }
+
+      <label class="field">
+        <span class="label">Title</span>
+        <input
+          type="text"
+          [(ngModel)]="form.title"
+          placeholder="e.g. Walking in Faith Daily"
+          maxlength="240" />
+      </label>
+
+      <label class="field">
+        <span class="label">Scripture Reference</span>
+        <input
+          type="text"
+          [(ngModel)]="form.scripture"
+          placeholder="e.g. Hebrews 11:1"
+          maxlength="160" />
+      </label>
+
+      <label class="field">
+        <span class="label">Body</span>
+        <textarea
+          rows="14"
+          [(ngModel)]="form.body"
+          placeholder="Write the devotional content…"
+          maxlength="15000"></textarea>
+        <small class="char-count">{{ form.body.length }} / 15000</small>
+      </label>
+
+      <div class="toggle-row">
+        <label class="toggle">
+          <input type="checkbox" [(ngModel)]="form.published" />
+          <span>Published</span>
+        </label>
+        <label class="toggle">
+          <input type="checkbox" [(ngModel)]="form.featured" />
+          <span>Featured on dashboard</span>
+        </label>
+      </div>
+
+    </div>
+
+    <footer class="editor-actions">
+      <button class="btn ghost" (click)="closeEditor()">Cancel</button>
+      <button
+        class="btn primary"
+        [disabled]="actionBusy() !== null"
+        (click)="saveEditor()">
+        {{ actionBusy() !== null ? 'Saving…' : (editorEditing() ? 'Save Changes' : 'Create Devotion') }}
+      </button>
+    </footer>
+  </div>
+}
+
+<!-- ============================================================
+     Hide dialog
+     ============================================================ -->
+@if (deleteDialogFor(); as d) {
+  <div class="dialog-backdrop" (click)="cancelDelete()"></div>
+  <div class="dialog">
+    <h3>Hide this devotion?</h3>
+    <p class="dialog-sub">By <strong>{{ d.authorName }}</strong> — {{ d.title }}</p>
+
+    <label>
+      Reason <span class="required">(required)</span>
+      <textarea
+        rows="3"
+        [(ngModel)]="deleteReason"
+        placeholder="Why is this devotion being hidden?"></textarea>
+    </label>
+
+    <div class="dialog-actions">
+      <button class="btn ghost" (click)="cancelDelete()">Cancel</button>
+      <button
+        class="btn danger"
+        [disabled]="!deleteReason.trim() || actionBusy() === d.id"
+        (click)="confirmDelete()">
+        {{ actionBusy() === d.id ? 'Hiding…' : 'Confirm Hide' }}
+      </button>
+    </div>
+  </div>
+}
