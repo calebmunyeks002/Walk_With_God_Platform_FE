@@ -1,0 +1,131 @@
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 22px;
+}
+
+.eyebrow {
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 800;
+  color: #8b42c9;
+}
+
+.page-head h1 {
+  font: 700 28px Georgia, serif;
+  margin: 6px 0;
+  color: #2a1740;
+}
+
+.page-head p { color: #7b7188; margin: 0; font-size: 14px; }
+
+.state {
+  text-align: center;
+  padding: 60px 20px;
+  color: #8c8295;
+
+  .spinner {
+    width: 36px; height: 36px;
+    border: 3px solid #f3eafb;
+    border-top-color: #8a31cf;
+    border-radius: 50%;
+    margin: 0 auto 12px;
+    animation: spin .8s linear infinite;
+  }
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.prayer-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+
+  @media (max-width: 900px) { grid-template-columns: 1fr; }
+}
+
+.prayer-card {
+  background: #fff;
+  border: 1px solid #eee6f4;
+  border-radius: 16px;
+  padding: 26px 28px;
+  box-shadow: 0 8px 30px rgba(54, 22, 78, .04);
+  transition: all .2s;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+
+  &.morning {
+    background: linear-gradient(180deg, #fffaf2 0%, #fff 60%);
+  }
+
+  &.evening {
+    background: linear-gradient(180deg, #f5f0ff 0%, #fff 60%);
+  }
+
+  &.highlight {
+    border-color: #8a31cf;
+    box-shadow: 0 12px 40px rgba(138, 49, 207, .15);
+  }
+
+  header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+
+    .slot-icon { font-size: 32px; }
+
+    .slot-label {
+      font-size: 10px;
+      letter-spacing: 1.5px;
+      font-weight: 800;
+      color: #8b42c9;
+      text-transform: uppercase;
+    }
+
+    h2 {
+      margin: 4px 0 0;
+      font: 700 20px Georgia, serif;
+      color: #2a1740;
+    }
+  }
+
+  .body {
+    margin: 0;
+    font: 15px/1.7 Georgia, serif;
+    color: #3b2a52;
+  }
+
+  .scripture {
+    display: inline-block;
+    align-self: flex-start;
+    background: #f3eafb;
+    color: #6d22a4;
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 12px;
+    border-top: 1px solid #f0ebf4;
+    font-size: 12px;
+    color: #8c8295;
+
+    .badge {
+      background: #e7f8ef;
+      color: #1f7a45;
+      padding: 3px 9px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+  }
+}

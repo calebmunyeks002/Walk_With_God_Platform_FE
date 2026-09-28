@@ -1,0 +1,174 @@
+<article class="post-card" [class.prayer]="post.type === 'PRAYER'">
+
+  <!-- Header -->
+  <header class="post-head">
+    <div class="avatar">
+      @if (post.author.avatarUrl) {
+      <img [src]="post.author.avatarUrl" [alt]="post.author.name" />
+      } @else {
+      <span>{{ initialOf(post.author.name) }}</span>
+      }
+    </div>
+
+    <div class="head-text">
+      <div class="author-line">
+        <strong>{{ post.author.name }}</strong>
+        @if (post.author.role === 'MENTOR') {
+        <span class="badge mentor">Mentor</span>
+        }
+        @if (post.author.role === 'ADMIN') {
+        <span class="badge admin">Admin</span>
+        }
+        @if (post.type === 'PRAYER') {
+        <span class="badge prayer">🙏 Prayer</span>
+        }
+        @if (post.communityId) {
+        <span class="badge community" title="Posted in a community">🏛 Community</span>
+        }
+      </div>
+      <span class="date">{{ formatDate(post.createdAt) }}</span>
+    </div>
+
+    @if (canDeletePost()) {
+    <button class="kebab" (click)="deletePost()" title="Delete post">🗑</button>
+    }
+  </header>
+
+  <!-- Body -->
+  <div class="post-body">
+    @if (post.content) {
+    <p class="post-text">{{ post.content }}</p>
+    }
+
+    @if (post.scriptureReference) {
+    <div class="scripture-chip">📖 {{ post.scriptureReference }}</div>
+    }
+
+    <!-- Batch 3 — uploaded media (image or video) -->
+    @if (post.mediaId) {
+    <div class="post-media">
+      @if (post.mediaType === 'VIDEO') {
+      <video [src]="mediaUrl(post.mediaId)" controls preload="metadata"></video>
+      } @else {
+      <img [src]="mediaUrl(post.mediaId)" alt="Post media" loading="lazy" />
+      }
+    </div>
+    }
+
+    <!-- Legacy — imageUrl on old posts -->
+    @if (!post.mediaId && post.imageUrl) {
+    <div class="post-image">
+      <img [src]="post.imageUrl" alt="Post image" loading="lazy" />
+    </div>
+    }
+
+    <!-- Shared origin card -->
+    @if (post.sharedFrom; as orig) {
+    <div class="quoted">
+      <header class="quoted-head">
+        <strong>{{ orig.author.name }}</strong>
+        <span>{{ formatDate(orig.createdAt) }}</span>
+      </header>
+      @if (orig.content) {
+      <p>{{ orig.content }}</p>
+      }
+      @if (orig.scriptureReference) {
+      <div class="scripture-chip small">📖 {{ orig.scriptureReference }}</div>
+      }
+
+      @if (orig.mediaId) {
+      <div class="post-media small">
+        @if (orig.mediaType === 'VIDEO') {
+        <video [src]="mediaUrl(orig.mediaId)" controls preload="metadata"></video>
+        } @else {
+        <img [src]="mediaUrl(orig.mediaId)" alt="Shared media" loading="lazy" />
+        }
+      </div>
+      } @else if (orig.imageUrl) {
+      <div class="post-image small">
+        <img [src]="orig.imageUrl" alt="Shared image" loading="lazy" />
+      </div>
+      }
+    </div>
+    }
+  </div>
+
+  <!-- Reaction + comment summary bar -->
+  <div class="stats-bar">
+    <div class="reaction-summary">
+      @if (post.reactionBreakdown.total > 0) {
+      <span class="emojis">
+        @if (post.reactionBreakdown.like > 0) { 👍 }
+        @if (post.reactionBreakdown.love > 0) { ❤️ }
+        @if (post.reactionBreakdown.amen > 0) { 🙌 }
+        @if (post.reactionBreakdown.pray > 0) { 🙏 }
+      </span>
+      <span>{{ post.reactionBreakdown.total }}</span>
+      }
+    </div>
+    <div class="comment-summary" (click)="toggleComments()">
+      {{ post.comments }} {{ post.comments === 1 ? 'comment' : 'comments' }}
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="action-bar">
+    <div class="reaction-picker">
+      @for (r of reactions; track r.type) {
+      <button class="reaction-btn" [class.active]="post.myReaction === r.type" [disabled]="reacting()"
+        (click)="react(r.type)" [title]="r.label">
+        <span class="emoji">{{ r.emoji }}</span>
+        <span class="label">{{ r.label }}</span>
+      </button>
+      }
+    </div>
+
+    <button class="action-btn" (click)="toggleComments()">
+      💬 Comment
+    </button>
+
+    <button class="action-btn" (click)="share()">
+      ↗️ Share
+    </button>
+  </div>
+
+  <!-- Comments section -->
+  @if (commentsOpen()) {
+  <div class="comments">
+    @if (commentsLoading()) {
+    <div class="comments-loading">Loading comments…</div>
+    } @else if (comments().length === 0) {
+    <div class="comments-empty">No comments yet. Be the first!</div>
+    } @else {
+    @for (c of comments(); track c.id) {
+    <div class="comment">
+      <div class="avatar sm">
+        @if (c.author.avatarUrl) {
+        <img [src]="c.author.avatarUrl" [alt]="c.author.name" />
+        } @else {
+        <span>{{ initialOf(c.author.name) }}</span>
+        }
+      </div>
+      <div class="comment-body">
+        <div class="comment-head">
+          <strong>{{ c.author.name }}</strong>
+          <span>{{ formatDate(c.createdAt) }}</span>
+        </div>
+        <p>{{ c.content }}</p>
+      </div>
+      @if (canDeleteComment(c)) {
+      <button class="comment-del" (click)="deleteComment(c)" title="Delete">✕</button>
+      }
+    </div>
+    }
+    }
+
+    <div class="comment-composer">
+      <textarea [(ngModel)]="newComment" placeholder="Write a comment…" rows="2" maxlength="2000"></textarea>
+      <button class="btn primary sm" [disabled]="!newComment.trim() || commentPosting()" (click)="postComment()">
+        {{ commentPosting() ? '…' : 'Send' }}
+      </button>
+    </div>
+  </div>
+  }
+</article>

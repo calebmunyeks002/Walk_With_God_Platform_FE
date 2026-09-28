@@ -1,1 +1,97 @@
-<section class="page-head"><div><span class="eyebrow">COMMUNITY</span><h1>A place to encourage one another</h1><p>Share faith, scripture, prayers, lessons and everyday wins.</p></div><div class="tabs"><button *ngFor="let x of ['All','Following','Mentors','Prayer']" [class.active]="filter()===x" (click)="filter.set(x)">{{x}}</button></div></section><div class="community-grid"><div><div class="composer"><div class="avatar">{{auth.user()?.name?.charAt(0)||'U'}}</div><div class="compose-body"><textarea [(ngModel)]="content" placeholder="What is God teaching you today?"></textarea><div class="compose-bottom"><input [(ngModel)]="scripture" placeholder="Add scripture reference e.g. Romans 8:28"><button (click)="publish()">Share →</button></div></div></div><article *ngFor="let p of posts()" class="post"><div class="post-head"><div class="avatar">{{p.author.name.charAt(0)}}</div><div><strong>{{p.author.name}}</strong><small>{{p.createdAt|date:'medium'}}</small></div><span class="more">•••</span></div><p>{{p.content}}</p><div *ngIf="p.scriptureReference" class="scripture">✝ {{p.scriptureReference}}</div><div class="actions"><button (click)="react(p)">♡ {{p.reactions}}</button><button>◌ {{p.comments}} comments</button><button>↗ Share</button></div></article><div *ngIf="posts().length===0" class="empty">No posts yet. Start the conversation.</div></div><aside><div class="info-card"><span class="tag">COMMUNITY GUIDELINES</span><h3>Build each other up.</h3><ul><li>Speak with grace and respect.</li><li>Keep Christ at the center.</li><li>Protect personal and pastoral privacy.</li><li>Report harmful or inappropriate content.</li></ul></div><div class="info-card purple"><span class="tag">DAILY CHALLENGE</span><h3>Encourage one person today.</h3><p>Send a thoughtful message or share a scripture that helped you this week.</p></div></aside></div>
+<section class="page-head">
+  <div>
+    <span class="eyebrow">COMMUNITY</span>
+    <h1>Walk Together</h1>
+    <p>Share, encourage, and grow with the family of God.</p>
+  </div>
+  <button class="btn primary" (click)="toggleComposer()">
+    ✍️ {{ composerOpen() ? 'Close' : 'New Post' }}
+  </button>
+</section>
+
+<!-- Composer -->
+@if (composerOpen()) {
+<section class="composer">
+  <textarea
+    [(ngModel)]="content"
+    placeholder="Share what God is doing in your life…"
+    rows="4"
+    maxlength="5000"></textarea>
+
+  <div class="composer-row">
+    <input
+      type="text"
+      [(ngModel)]="scripture"
+      placeholder="Scripture reference (optional) — e.g. John 3:16"
+      maxlength="160" />
+  </div>
+
+  <!-- Media uploader (Batch 3) -->
+  <app-media-uploader
+    (uploaded)="onMediaUploaded($event)"
+    (cleared)="onMediaCleared()" />
+
+  <div class="composer-row">
+    <div class="post-type-pills">
+      <button
+        type="button"
+        [class.active]="postType() === 'NORMAL'"
+        (click)="postType.set('NORMAL')">📝 Post</button>
+      <button
+        type="button"
+        [class.active]="postType() === 'PRAYER'"
+        (click)="postType.set('PRAYER')">🙏 Prayer</button>
+    </div>
+
+    <button
+      class="btn primary"
+      [disabled]="(!content.trim() && !selectedMedia()) || publishing()"
+      (click)="publish()">
+      {{ publishing() ? 'Publishing…' : 'Publish' }}
+    </button>
+  </div>
+</section>
+}
+
+<!-- Filters -->
+<nav class="filter-tabs">
+  @for (f of filters; track f.key) {
+    <button
+      class="filter-tab"
+      [class.active]="filter() === f.key"
+      (click)="setFilter(f.key)">
+      <span class="tab-icon">{{ f.icon }}</span>
+      {{ f.label }}
+    </button>
+  }
+</nav>
+
+<!-- Feed -->
+@if (loading()) {
+  <div class="feed-state">
+    <div class="spinner"></div>
+    <p>Loading posts…</p>
+  </div>
+} @else if (posts().length === 0) {
+  <div class="feed-state">
+    <p>No posts in this feed yet.</p>
+  </div>
+} @else {
+  <div class="feed">
+    @for (p of posts(); track p.id) {
+      <app-post-card
+        [post]="p"
+        (updated)="onPostUpdated($event)"
+        (deleted)="onPostDeleted($event)"
+        (shareRequested)="onShareRequested($event)" />
+    }
+  </div>
+}
+
+<!-- Share modal -->
+@if (shareTarget(); as target) {
+  <app-share-modal
+    [post]="target"
+    (close)="shareTarget.set(null)"
+    (shared)="onShared($event)" />
+}

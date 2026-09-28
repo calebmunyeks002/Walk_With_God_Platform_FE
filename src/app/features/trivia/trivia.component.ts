@@ -11,7 +11,16 @@ interface Question {
   question: string;
   options: string[];
   difficulty: string;
+  /** Populated only after submit. */
+  correctIndex?: number;
 }
+
+interface Answer {
+  questionId: string;
+  selectedIndex: number;
+}
+
+type ReviewFilter = 'ALL' | 'WRONG';
 
 @Component({
   standalone: true,
@@ -35,17 +44,43 @@ export class TriviaComponent {
   // Quiz run state
   currentIndex = signal(0);
   selected = signal<number | null>(null);
-  answers = signal<Array<{ questionId: string; selectedIndex: number }>>([]);
+  answers = signal<Answer[]>([]);
   finished = signal(false);
   score = signal(0);
   total = signal(0);
   submitting = signal(false);
 
+  // Review state
+  reviewFilter = signal<ReviewFilter>('ALL');
+
   currentQuestion = computed(() => this.questions()[this.currentIndex()] ?? null);
+
   progressPct = computed(() => {
     const t = this.questions().length;
     if (!t) return 0;
-    return Math.round(((this.currentIndex()) / t) * 100);
+    return Math.round((this.currentIndex() / t) * 100);
+  });
+
+  /** Map questionId → chosenIndex, for quick lookup in review. */
+  answersMap = computed(() => {
+    const m = new Map<string, number>();
+    this.answers().forEach((a) => m.set(a.questionId, a.selectedIndex));
+    return m;
+  });
+
+  /** Review list, optionally filtered to wrong answers only. */
+  reviewQuestions = computed(() => {
+    const qs = this.questions();
+    if (this.reviewFilter() === 'ALL') return qs;
+    return qs.filter((q) => {
+      const chosen = this.answersMap().get(q.id);
+      return chosen !== q.correctIndex;
+    });
+  });
+
+  wrongCount = computed(() => {
+    const map = this.answersMap();
+    return this.questions().filter((q) => map.get(q.id) !== q.correctIndex).length;
   });
 
   constructor() {
@@ -59,6 +94,7 @@ export class TriviaComponent {
 
     this.api.triviaToday(this.difficulty()).subscribe({
       next: (r) => {
+        // Server-side "answerIndex" isn't sent yet; we'll score on submit.
         this.questions.set(r.questions ?? []);
         this.completed.set(r.completed);
         this.passed.set(r.passed);
@@ -67,7 +103,7 @@ export class TriviaComponent {
         this.loading.set(false);
       },
       error: () => {
-        this.error.set('Could not load today\'s trivia. Try again.');
+        this.error.set("Could not load today's trivia. Try again.");
         this.loading.set(false);
       },
     });
@@ -86,6 +122,7 @@ export class TriviaComponent {
     this.finished.set(false);
     this.score.set(0);
     this.total.set(0);
+    this.reviewFilter.set('ALL');
     this.questions.set([]);
   }
 
@@ -109,9 +146,11 @@ export class TriviaComponent {
     }
   }
 
-  submit() {
+    submit() {
     this.submitting.set(true);
-    this.api.triviaSubmit(this.difficulty(), this.answers()).subscribe({
+    const answers = this.answers();
+
+    this.api.triviaSubmit(this.difficulty(), answers).subscribe({
       next: (r) => {
         this.score.set(r.score);
         this.total.set(r.total);
@@ -119,6 +158,14 @@ export class TriviaComponent {
         this.completed.set(true);
         this.finished.set(true);
         this.submitting.set(false);
+
+        // Attach correctIndex to each question
+        const byId = new Map<string, number>();
+        r.results.forEach((res) => byId.set(res.questionId, res.correctIndex));
+
+        this.questions.update((qs) =>
+          qs.map((q) => ({ ...q, correctIndex: byId.get(q.id) ?? -1 }))
+        );
       },
       error: () => {
         this.error.set('Failed to submit. Try again.');
@@ -126,6 +173,16 @@ export class TriviaComponent {
       },
     });
   }
+  // /** Get the correct indexes to display in review. */
+  // private loadReviewAnswers() {
+  //   this.api.triviaToday(this.difficulty()).subscribe({
+  //     next: (r) => {
+  //       // If backend now returns correctIndex, use it
+  //       this.questions.set(r.questions ?? this.questions());
+  //     },
+  //     error: () => {},
+  //   });
+  // }
 
   retake() {
     this.reset();
@@ -134,5 +191,15 @@ export class TriviaComponent {
 
   optionLetter(i: number): string {
     return ['A', 'B', 'C', 'D', 'E', 'F'][i] ?? '';
+  }
+
+  /** Was this question answered correctly? */
+  isCorrect(q: Question): boolean {
+    return this.answersMap().get(q.id) === q.correctIndex;
+  }
+
+  /** Get the user's chosen answer for a question, or -1. */
+  chosen(q: Question): number {
+    return this.answersMap().get(q.id) ?? -1;
   }
 }

@@ -2,20 +2,11 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import {
-  Post,
-  Mentor,
-  Conversation,
-  Message,
-  Devotion,
-  TriviaQuestion,
-  User,
-  Role,
-  Page,
-  SystemStats,
-  AuditLog,
-  AuditFilter,
-  UserFilter,
-  MentorApplication,
+  Post, Comment, ReactionType, ReactionBreakdown, PostType, FeedFilter,
+  FollowStats, Prayer, DailyPrayers,
+  Mentor, Conversation, Message, Devotion, TriviaQuestion, User, Role,
+  Page, SystemStats, AuditLog, AuditFilter, UserFilter, MentorApplication,Community, CommunityMode, CommunityVisibility, CommunityMemberView,
+  CommunityJoinRequestView, AdminCommunity,
 } from '../models/models';
 
 /** Backend conversation shape (from ConversationController). */
@@ -85,6 +76,159 @@ export class ApiService {
   react(postId: string, type = 'LIKE') {
     return this.post<void>(`/posts/${postId}/reactions`, { type });
   }
+
+  /* =========================================================
+   Community — Batch 2
+   ========================================================= */
+
+postsFiltered(filter: FeedFilter, page = 0, size = 20) {
+  return this.get<Page<Post>>('/posts', { filter, page, size });
+}
+
+createPostFull(body: {
+  content: string;
+  scriptureReference?: string;
+  imageUrl?: string;
+  type?: PostType;
+  mediaId?: string;
+  communityId?: string;
+}) {
+  return this.post<Post>('/posts', body);
+}
+
+deletePost(postId: string) {
+  return this.delete<void>(`/posts/${postId}`);
+}
+
+sharePost(postId: string, content?: string) {
+  return this.post<Post>(`/posts/${postId}/share`, { content });
+}
+
+reactToPost(postId: string, type: ReactionType) {
+  return this.post<ReactionBreakdown>(`/posts/${postId}/reactions`, { type });
+}
+
+unreactToPost(postId: string) {
+  return this.delete<ReactionBreakdown>(`/posts/${postId}/reactions`);
+}
+
+postComments(postId: string) {
+  return this.get<Comment[]>(`/posts/${postId}/comments`);
+}
+
+addComment(postId: string, content: string) {
+  return this.post<Comment>(`/posts/${postId}/comments`, { content });
+}
+
+deleteComment(postId: string, commentId: string) {
+  return this.delete<void>(`/posts/${postId}/comments/${commentId}`);
+}
+
+/* =========================================================
+   Communities — Batch 4
+   ========================================================= */
+
+communities(mode: CommunityMode = 'discover', page = 0, size = 20) {
+  return this.get<Page<Community>>('/communities', { mode, page, size });
+}
+
+community(slug: string) {
+  return this.get<Community>(`/communities/${slug}`);
+}
+
+createCommunity(body: {
+  name: string;
+  description?: string;
+  coverImageUrl?: string;
+  iconEmoji?: string;
+  visibility?: CommunityVisibility;
+}) {
+  return this.post<Community>('/communities', body);
+}
+
+updateCommunity(id: string, body: Partial<{
+  name: string;
+  description: string;
+  coverImageUrl: string;
+  iconEmoji: string;
+  visibility: CommunityVisibility;
+}>) {
+  return this.patch<Community>(`/communities/${id}`, body);
+}
+
+deleteCommunity(id: string) {
+  return this.delete<void>(`/communities/${id}`);
+}
+
+joinCommunity(id: string) {
+  return this.post<Community>(`/communities/${id}/join`, {});
+}
+
+leaveCommunity(id: string) {
+  return this.delete<void>(`/communities/${id}/leave`);
+}
+
+communityMembers(id: string) {
+  return this.get<CommunityMemberView[]>(`/communities/${id}/members`);
+}
+
+removeCommunityMember(communityId: string, userId: string) {
+  return this.delete<void>(`/communities/${communityId}/members/${userId}`);
+}
+
+communityJoinRequests(id: string) {
+  return this.get<CommunityJoinRequestView[]>(`/communities/${id}/requests`);
+}
+
+approveJoinRequest(communityId: string, requestId: string) {
+  return this.post<void>(`/communities/${communityId}/requests/${requestId}/approve`, {});
+}
+
+rejectJoinRequest(communityId: string, requestId: string) {
+  return this.post<void>(`/communities/${communityId}/requests/${requestId}/reject`, {});
+}
+postsByCommunity(communityId: string, page = 0, size = 20) {
+  return this.get<Page<Post>>(`/posts/community/${communityId}`, { page, size });
+}
+
+
+/* ---------- Admin ---------- */
+
+adminCommunities(filter: { hidden?: boolean; page?: number; size?: number }) {
+  return this.get<Page<AdminCommunity>>('/admin/communities', {
+    hidden: filter.hidden,
+    page: filter.page ?? 0,
+    size: filter.size ?? 20,
+  });
+}
+
+adminHideCommunity(id: string, reason: string) {
+  return this.post<AdminCommunity>(`/admin/communities/${id}/hide`, { reason });
+}
+
+adminRestoreCommunity(id: string) {
+  return this.post<AdminCommunity>(`/admin/communities/${id}/restore`, {});
+}
+
+/* ---------- Follows ---------- */
+
+followUser(userId: string) {
+  return this.post<FollowStats>(`/users/${userId}/follow`, {});
+}
+
+unfollowUser(userId: string) {
+  return this.delete<FollowStats>(`/users/${userId}/follow`);
+}
+
+followStatus(userId: string) {
+  return this.get<FollowStats>(`/users/${userId}/follow`);
+}
+
+/* ---------- Prayers ---------- */
+
+todaysPrayers() {
+  return this.get<DailyPrayers>('/prayers/today');
+}
 
   /* ---------------- Mentors (public) ---------------- */
 
@@ -190,7 +334,7 @@ export class ApiService {
     }>('/trivia/today', { difficulty });
   }
 
-  triviaSubmit(
+    triviaSubmit(
     difficulty: 'EASY' | 'MEDIUM' | 'HARD',
     answers: Array<{ questionId: string; selectedIndex: number }>
   ) {
@@ -199,9 +343,13 @@ export class ApiService {
       total: number;
       passed: boolean;
       newlyPassed: boolean;
+      results: Array<{
+        questionId: string;
+        correctIndex: number;
+        selectedIndex: number;
+      }>;
     }>('/trivia/today/submit', { difficulty, answers });
   }
-
   /** Kept for backwards compatibility — returns questions from the daily pool. */
   trivia(difficulty?: string) {
     return this.get<TriviaQuestion[]>('/trivia/questions', { difficulty });
@@ -211,6 +359,13 @@ export class ApiService {
 
   me() {
     return this.get<User>('/auth/me');
+  }
+
+    changePassword(currentPassword: string, newPassword: string) {
+    return this.post<void>('/users/me/change-password', {
+      currentPassword,
+      newPassword,
+    });
   }
 
   /* =========================================================

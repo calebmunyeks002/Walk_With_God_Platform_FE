@@ -35,8 +35,11 @@ export class AppShellComponent {
     // Common
     { label: 'Home',            icon: '⌂', route: '/dashboard',                roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
     { label: 'Community',       icon: '◉', route: '/community',                roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
+    { label: 'Communities',     icon: '🏛', route: '/communities', roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
+    { label: 'Communities (Admin)', icon: '🏛', route: '/admin/communities', roles: ['ADMIN'] },
     { label: 'Mentors',         icon: '✦', route: '/mentors',                  roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
     { label: 'Bible',           icon: '✝', route: '/bible',                    roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
+    { label: 'Prayer',          icon: '🙏', route: '/prayer',                  roles: ['MEMBER', 'MENTOR', 'ADMIN'] },  // ← NEW
     { label: 'Bible Trivia',    icon: '?', route: '/trivia',                   roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
     { label: 'Trivia Analytics', icon: '📊', route: '/admin/trivia-analytics', roles: ['ADMIN'] },
     { label: 'Devotions',       icon: '📖', route: '/devotions',               roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
@@ -53,7 +56,8 @@ export class AppShellComponent {
     { label: 'Content Moderation', icon: '✎', route: '/admin/posts',           roles: ['ADMIN'] },
     { label: 'Reports',         icon: '⚠', route: '/admin/reports',            roles: ['ADMIN'] },
     { label: 'Report Builder',  icon: '⬇', route: '/admin/reports-builder',    roles: ['ADMIN'] },
-    { label: 'Notifications',   icon: '🔔', route: '/admin/notifications',     roles: ['ADMIN'] },  // ← NEW
+    { label: 'Notifications',   icon: '🔔', route: '/admin/notifications',     roles: ['ADMIN'] },
+    { label: 'Media Review', icon: '🖼', route: '/admin/media-review', roles: ['ADMIN'] },
     { label: 'Devotions (Admin)', icon: '📖', route: '/admin/devotions',       roles: ['ADMIN'] },
     { label: 'Trivia (Admin)',  icon: '?', route: '/admin/trivia',             roles: ['ADMIN'] },
     { label: 'Audit Trail',     icon: '⏱', route: '/admin/audit',              roles: ['ADMIN'] },
@@ -145,6 +149,18 @@ export class AppShellComponent {
       case 'ADMIN_BROADCAST': return '📢';
       case 'POST_REPORTED': return '⚠';
       case 'CALL_MISSED': return '📞';
+
+      // ---- Batch 2 additions ----
+      case 'POST_LIKE':         return '👍';
+      case 'POST_LOVE':         return '❤️';
+      case 'POST_AMEN':         return '🙌';
+      case 'POST_PRAY':         return '🙏';
+      case 'POST_COMMENT':      return '💬';
+      case 'POST_SHARE':        return '↗';
+      case 'NEW_FOLLOWER':      return '👤';
+      case 'PRAYER':            return '🙏';
+      case 'DEVOTION_PUBLISHED':return '📖';
+
       default: return '🔔';
     }
   }

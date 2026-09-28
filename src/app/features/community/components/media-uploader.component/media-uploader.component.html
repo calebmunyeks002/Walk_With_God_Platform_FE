@@ -1,0 +1,40 @@
+@if (!selected() && !uploading()) {
+  <label class="drop-zone" (dragover)="onDragOver($event)" (drop)="onDrop($event)">
+    <input type="file" accept="image/*,video/mp4,video/webm"
+           (change)="onFileSelected($event)" hidden />
+    <div class="dz-icon">📎</div>
+    <div class="dz-text">
+      <strong>Add photo or video</strong>
+      <small>Drag & drop or click · Max 10 MB image / 25 MB video / 60s video</small>
+    </div>
+  </label>
+}
+
+@if (uploading()) {
+  <div class="upload-progress">
+    <div class="bar" [style.width.%]="progress()"></div>
+    <span>{{ progress() }}%</span>
+  </div>
+}
+
+@if (selected(); as m) {
+  <div class="preview">
+    @if (previewType() === 'IMAGE' && previewUrl()) {
+      <img [src]="previewUrl()!" alt="Preview" />
+    } @else if (previewType() === 'VIDEO' && previewUrl()) {
+      <video [src]="previewUrl()!" controls></video>
+    }
+    <div class="preview-meta">
+      <span class="chip">{{ m.type }}</span>
+      <span>{{ humanSize(m.sizeBytes) }}</span>
+      @if (m.status === 'FLAGGED') {
+        <span class="chip warn">Flagged for review</span>
+      }
+      <button class="clear" (click)="clear()" title="Remove">✕</button>
+    </div>
+  </div>
+}
+
+@if (error()) {
+  <div class="error">{{ error() }}</div>
+}

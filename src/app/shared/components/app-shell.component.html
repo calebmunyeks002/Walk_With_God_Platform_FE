@@ -34,8 +34,8 @@
 
         @if (sidebarOpen()) {
         <div class="sidebar-quote">
-            “With God, every step forward<br>
-            is a step toward a better you.”
+            "With God, every step forward<br>
+            is a step toward a better you."
         </div>
         }
 
@@ -58,101 +58,104 @@
                 <input type="text" placeholder="Search scripture, people, devotion…" aria-label="Search" />
             </div>
 
-                        <div class="topbar-actions">
-                        
-                            <!-- Notifications bell -->
-                            <div class="notif-menu">
-                                <button class="icon-btn notif-btn" (click)="toggleNotif()" [attr.aria-expanded]="notifOpen()"
-                                    title="Notifications">
-                                    🔔
-                                    @if (notif.unread() > 0) {
-                                    <span class="notif-badge">{{ notif.unread() > 99 ? '99+' : notif.unread() }}</span>
-                                    }
-                                </button>
-                        
-                                @if (notifOpen()) {
-                                <div class="user-backdrop" (click)="closeNotif()"></div>
-                                <div class="notif-dropdown">
-                                    <div class="notif-head">
-                                        <strong>Notifications</strong>
-                                        @if (notif.unread() > 0) {
-                                        <button class="text-btn" (click)="notif.markAllRead()">
-                                            Mark all read
-                                        </button>
-                                        }
-                                    </div>
-                        
-                                    <div class="notif-list">
-                                        @if (notif.loading()) {
-                                        <div class="notif-state">Loading…</div>
-                                        } @else if (notif.recent().length === 0) {
-                                        <div class="notif-state">
-                                            <div class="empty-icon">🔔</div>
-                                            <p>You're all caught up</p>
-                                            <small>New notifications will appear here</small>
-                                        </div>
-                                        } @else {
-                                        @for (n of notif.recent().slice(0, 10); track n.id) {
-                                        <button class="notif-item" [class.unread]="!n.read" (click)="openNotification(n)">
-                                            <div class="notif-icon">{{ notifIcon(n.type) }}</div>
-                                            <div class="notif-content">
-                                                <strong>{{ n.title }}</strong>
-                                                @if (n.body) {
-                                                <p>{{ n.body }}</p>
-                                                }
-                                                <small>{{ timeAgo(n.createdAt) }}</small>
-                                            </div>
-                                            @if (!n.read) {
-                                            <span class="unread-dot"></span>
-                                            }
-                                        </button>
-                                        }
-                                        }
-                                    </div>
-                                </div>
-                                }
+            <div class="topbar-actions">
+
+                <!-- Notifications bell -->
+                <div class="notif-menu">
+                    <button class="icon-btn notif-btn" (click)="toggleNotif()" [attr.aria-expanded]="notifOpen()"
+                        title="Notifications">
+                        🔔
+                        @if (notif.unread() > 0) {
+                        <span class="notif-badge">{{ notif.unread() > 99 ? '99+' : notif.unread() }}</span>
+                        }
+                    </button>
+
+                    @if (notifOpen()) {
+                    <div class="user-backdrop" (click)="closeNotif()"></div>
+                    <div class="notif-dropdown">
+                        <div class="notif-head">
+                            <strong>Notifications</strong>
+                            @if (notif.unread() > 0) {
+                            <button class="text-btn" (click)="notif.markAllRead()">
+                                Mark all read
+                            </button>
+                            }
+                        </div>
+
+                        <div class="notif-list">
+                            @if (notif.loading()) {
+                            <div class="notif-state">Loading…</div>
+                            } @else if (notif.recent().length === 0) {
+                            <div class="notif-state">
+                                <div class="empty-icon">🔔</div>
+                                <p>You're all caught up</p>
+                                <small>New notifications will appear here</small>
                             </div>
-                        
-                            <!-- Messages -->
-                            <button class="icon-btn" title="Messages" routerLink="/inbox">✉</button>
-                        
-                            <!-- User chip with dropdown -->
-                            <div class="user-menu">
-                                <button class="user-chip" (click)="toggleUserMenu()" [attr.aria-expanded]="userMenuOpen()">
-                                    <div class="avatar">{{ initials() }}</div>
-                                    <span class="user-name">{{ auth.user()?.name }}</span>
-                                </button>
-                        
-                                @if (userMenuOpen()) {
-                                <div class="user-backdrop" (click)="closeUserMenu()"></div>
-                                <div class="user-dropdown">
-                                    <div class="dropdown-head">
-                                        <div class="avatar lg">{{ initials() }}</div>
-                                        <div class="dropdown-info">
-                                            <strong>{{ auth.user()?.name }}</strong>
-                                            <span class="role-tag">{{ roleLabel() }}</span>
-                                            <small class="email">{{ auth.user()?.email }}</small>
-                                        </div>
-                                    </div>
-                        
-                                    <div class="dropdown-divider"></div>
-                        
-                                    <a class="dropdown-item" routerLink="/profile" (click)="closeUserMenu()">
-                                        <span>☺</span> My Profile
-                                    </a>
-                                    <a class="dropdown-item" routerLink="/inbox" (click)="closeUserMenu()">
-                                        <span>✉</span> Inbox
-                                    </a>
-                        
-                                    <div class="dropdown-divider"></div>
-                        
-                                    <button class="dropdown-item danger" (click)="signOut()">
-                                        <span>⏻</span> Sign out
-                                    </button>
+                            } @else {
+                            @for (n of notif.recent().slice(0, 10); track n.id) {
+                            <button class="notif-item" [class.unread]="!n.read" (click)="openNotification(n)">
+                                <div class="notif-icon">{{ notifIcon(n.type) }}</div>
+                                <div class="notif-content">
+                                    <strong>{{ n.title }}</strong>
+                                    @if (n.body) {
+                                    <p>{{ n.body }}</p>
+                                    }
+                                    <small>{{ timeAgo(n.createdAt) }}</small>
                                 </div>
+                                @if (!n.read) {
+                                <span class="unread-dot"></span>
                                 }
+                            </button>
+                            }
+                            }
+                        </div>
+                    </div>
+                    }
+                </div>
+
+                <!-- Messages -->
+                <button class="icon-btn" title="Messages" routerLink="/inbox">✉</button>
+
+                <!-- User chip with dropdown -->
+                <div class="user-menu">
+                    <button class="user-chip" (click)="toggleUserMenu()" [attr.aria-expanded]="userMenuOpen()">
+                        <div class="avatar">{{ initials() }}</div>
+                        <span class="user-name">{{ auth.user()?.name }}</span>
+                    </button>
+
+                    @if (userMenuOpen()) {
+                    <div class="user-backdrop" (click)="closeUserMenu()"></div>
+                    <div class="user-dropdown">
+                        <div class="dropdown-head">
+                            <div class="avatar lg">{{ initials() }}</div>
+                            <div class="dropdown-info">
+                                <strong>{{ auth.user()?.name }}</strong>
+                                <span class="role-tag">{{ roleLabel() }}</span>
+                                <small class="email">{{ auth.user()?.email }}</small>
                             </div>
                         </div>
+
+                        <div class="dropdown-divider"></div>
+
+                        <a class="dropdown-item" routerLink="/profile" (click)="closeUserMenu()">
+                            <span>☺</span> My Profile
+                        </a>
+                        <a class="dropdown-item" routerLink="/inbox" (click)="closeUserMenu()">
+                            <span>✉</span> Inbox
+                        </a>
+                        <a class="dropdown-item" routerLink="/prayer" (click)="closeUserMenu()">
+                            <span>🙏</span> Today's Prayer
+                        </a>
+
+                        <div class="dropdown-divider"></div>
+
+                        <button class="dropdown-item danger" (click)="signOut()">
+                            <span>⏻</span> Sign out
+                        </button>
+                    </div>
+                    }
+                </div>
+            </div>
         </header>
 
         <!-- Routed content -->

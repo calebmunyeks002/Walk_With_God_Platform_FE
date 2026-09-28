@@ -1,1 +1,208 @@
-.page-head{margin-bottom:20px}.eyebrow,.tag{font-size:10px;letter-spacing:2px;font-weight:800;color:#8b42c9}.page-head h1{font:700 31px Georgia,serif;margin:6px 0}.page-head p{color:#7b7188}.profile-grid{display:grid;grid-template-columns:minmax(0,1.5fr) 300px;gap:18px}.profile-card,.card{background:#fff;border:1px solid #eee6f4;border-radius:18px;overflow:hidden}.cover{height:120px;background:linear-gradient(120deg,#5c1a8e,#bd6be7);position:relative}.profile-main{display:flex;gap:16px;align-items:end;padding:0 25px;margin-top:-34px;position:relative}.avatar{width:78px;height:78px;border:5px solid #fff;border-radius:50%;background:linear-gradient(135deg,#a64add,#623293);display:grid;place-items:center;color:#fff;font-size:27px;font-weight:800}.identity h2{margin:0 0 3px;font:700 24px Georgia,serif}.identity span{background:#eee1f7;color:#6c269d;border-radius:15px;padding:4px 8px;font-size:9px;font-weight:800}.identity p{color:#8d8295;font-size:10px}.profile-card form{padding:25px;display:grid;gap:13px}.profile-card label{font-size:12px;color:#6d6177;font-weight:700}.profile-card input,.profile-card textarea{display:block;width:100%;box-sizing:border-box;border:1px solid #e1d8e8;border-radius:10px;padding:11px;margin-top:7px;outline:0;font:14px Arial}.profile-card textarea{min-height:110px;resize:vertical}.primary{border:0;background:#6d25a3;color:#fff;padding:12px;border-radius:10px;font-weight:800}.saved{color:#2e7a40;background:#effaf1;padding:9px;border-radius:9px}.card{padding:20px;margin-bottom:14px}.card p{color:#746a7e;font-size:12px;line-height:1.55}.metric{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid #f0ebf4}.metric b{font-size:23px;color:#6c26a1}.metric span{font-size:11px;color:#7c7184}@media(max-width:800px){.profile-grid{grid-template-columns:1fr}}
+.page-head { margin-bottom: 22px; }
+.eyebrow { font-size: 10px; letter-spacing: 2px; font-weight: 800; color: #8b42c9; }
+.page-head h1 { font: 700 28px Georgia, serif; margin: 6px 0; color: #2a1740; }
+.page-head p { color: #7b7188; margin: 0; font-size: 14px; }
+
+.toast.success {
+  background: #e7f8ef;
+  color: #1f7a45;
+  border: 1px solid #b8e3c9;
+  padding: 10px 14px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 20px;
+  align-items: start;
+
+  @media (max-width: 800px) { grid-template-columns: 1fr; }
+}
+
+.card {
+  background: #fff;
+  border: 1px solid #eee6f4;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 8px 30px rgba(54,22,78,.04);
+  margin-bottom: 20px;
+}
+
+.identity-card {
+  text-align: center;
+
+  .avatar-lg {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, #9d43d7, #63319a);
+    color: #fff; font-size: 32px; font-weight: 800;
+    display: grid; place-items: center; margin: 0 auto 14px;
+  }
+  h2 { margin: 0 0 6px; font: 700 20px Georgia, serif; color: #2a1740; }
+  .role-badge {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    padding: 3px 10px;
+    border-radius: 6px;
+    background: #f3eafb;
+    color: #6d22a4;
+  }
+  .joined { color: #8c8295; font-size: 12px; margin: 10px 0 0; }
+}
+
+.settings-card h3,
+.password-card h3 {
+  margin: 0 0 18px;
+  font: 700 18px Georgia, serif;
+  color: #2a1740;
+}
+
+.field {
+  margin-bottom: 20px;
+
+  label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 1.4px;
+    font-weight: 800;
+    color: #8b42c9;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  textarea {
+    width: 100%;
+    border: 1px solid #e2d9ec;
+    border-radius: 10px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    resize: vertical;
+    box-sizing: border-box;
+    &:focus { border-color: #8a31cf; box-shadow: 0 0 0 3px #8a31cf22; }
+  }
+  .hint {
+    display: block;
+    font-size: 11px;
+    color: #8c8295;
+    margin-top: 6px;
+  }
+  .char-count {
+    display: block;
+    font-size: 11px;
+    color: #8c8295;
+    text-align: right;
+    margin-top: 4px;
+  }
+  .field-error {
+    display: block;
+    font-size: 12px;
+    color: #9f2440;
+    margin-top: 6px;
+    font-weight: 700;
+  }
+}
+
+.readonly-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: #faf8fc;
+  border: 1px dashed #e2d9ec;
+  color: #5b3a70;
+  font-size: 14px;
+
+  span:first-child { flex: 1; }
+  .lock { opacity: .6; font-size: 14px; }
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.card-head-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+
+  h3 { margin: 0 0 4px; }
+  small { color: #8c8295; font-size: 12px; }
+}
+
+.pw-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  max-width: 460px;
+
+  label {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 1.4px;
+    font-weight: 800;
+    color: #8b42c9;
+    text-transform: uppercase;
+
+    input {
+      display: block;
+      width: 100%;
+      margin-top: 8px;
+      height: 44px;
+      border: 1px solid #e2d9ec;
+      border-radius: 10px;
+      padding: 0 14px;
+      font-size: 14px;
+      font-family: inherit;
+      box-sizing: border-box;
+      outline: none;
+      &:focus { border-color: #8a31cf; box-shadow: 0 0 0 3px #8a31cf22; }
+    }
+  }
+}
+
+.form-error {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fff0f2;
+  color: #9f2440;
+  border: 1px solid #f1c7cf;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.form-success {
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #e7f8ef;
+  color: #1f7a45;
+  border: 1px solid #b8e3c9;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.btn {
+  height: 42px;
+  border: 0;
+  border-radius: 10px;
+  padding: 0 20px;
+  font-weight: 800;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: inherit;
+
+  &.primary { background: linear-gradient(90deg, #8a31cf, #4e177e); color: #fff; }
+  &.ghost   { background: #f3eafb; color: #6d22a4; }
+  &:disabled { opacity: .5; cursor: not-allowed; }
+}

@@ -4,7 +4,13 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { BibleService } from '../../core/services/bible.service';
 import { ApiService } from '../../core/services/api.service';
-import { BIBLE_BOOKS } from '../../core/data/bible-books';
+import { BIBLE_BOOKS, BibleBook, bookName } from '../../core/data/bible-books';
+import {
+  BIBLE_LANGUAGES,
+  BibleLanguage,
+  BibleVersionOption,
+  findLanguageForVersion,
+} from '../../core/data/bible-versions';
 
 interface DisplayVerse {
   number: number;
@@ -12,20 +18,6 @@ interface DisplayVerse {
   highlightId?: string;
   highlightColor?: string;
 }
-
-interface VersionOption {
-  id: string;
-  label: string;
-}
-
-const CURATED_ENGLISH_VERSIONS: VersionOption[] = [
-  { id: 'en-kjv', label: 'King James Version (KJV)' },
-  { id: 'en-asv', label: 'American Standard Version (ASV)' },
-  { id: 'en-web', label: 'World English Bible (WEB)' },
-  { id: 'en-bbe', label: 'Bible in Basic English (BBE)' },
-  { id: 'en-dby', label: 'Darby Bible (DBY)' },
-  { id: 'en-ylt', label: "Young's Literal Translation (YLT)" },
-];
 
 @Component({
   standalone: true,
@@ -41,8 +33,10 @@ export class BibleComponent {
   private router = inject(Router);
 
   books = BIBLE_BOOKS;
+  languages: BibleLanguage[] = BIBLE_LANGUAGES;
 
-  // Default: Genesis 1 in KJV
+  // Selection state
+  languageCode = signal('en');
   versionId = signal('en-kjv');
   bookId = signal('genesis');
   chapterNum = signal(1);
@@ -64,11 +58,24 @@ export class BibleComponent {
     { key: 'purple', label: 'Purple', hex: '#ede9fe' },
   ];
 
-  versions = signal<VersionOption[]>([...CURATED_ENGLISH_VERSIONS]);
+  /** Versions available for the currently selected language. */
+  availableVersions = computed<BibleVersionOption[]>(() => {
+    const lang = this.languages.find((l) => l.code === this.languageCode());
+    return lang?.versions ?? [];
+  });
 
-  currentBook = computed(() =>
-    this.books.find((b) => b.id === this.bookId()) ?? this.books[0]
+  currentBook = computed(
+    () => this.books.find((b) => b.id === this.bookId()) ?? this.books[0]
   );
+
+  /**
+   * Localized display name for the current book.
+   * Falls back to the English name when the active language has no override.
+   */
+  currentBookName = computed(() =>
+    bookName(this.currentBook(), this.languageCode())
+  );
+
   totalChapters = computed(() => this.currentBook().chapters);
   chapterNumbers = computed(() =>
     Array.from({ length: this.totalChapters() }, (_, i) => i + 1)
@@ -81,38 +88,42 @@ export class BibleComponent {
       const book = params.get('book');
       const chapter = params.get('chapter');
       const version = params.get('version');
+      const lang = params.get('lang');
+
       if (book && this.books.some((b) => b.id === book)) this.bookId.set(book);
       if (chapter && !isNaN(+chapter)) this.chapterNum.set(+chapter);
-      if (version) this.versionId.set(version);
+
+      if (version) {
+        this.versionId.set(version);
+        const detectedLang = findLanguageForVersion(version);
+        if (detectedLang) this.languageCode.set(detectedLang.code);
+      } else if (lang && this.languages.some((l) => l.code === lang)) {
+        this.languageCode.set(lang);
+        const first = this.availableVersions()[0];
+        if (first) this.versionId.set(first.id);
+      }
     });
 
     effect(() => {
       this.loadChapter();
     });
+  }
 
-    // Load curated versions from API in background
-    this.bible.versions().subscribe({
-      next: (list) => {
-        if (!list || list.length === 0) return;
-        const allowed = CURATED_ENGLISH_VERSIONS.map((v) => v.id);
-        const available: VersionOption[] = list
-          .map((v) => ({
-            id: String(v.id ?? v['identifier'] ?? ''),
-            label: String(
-              (v as any).version ?? v['name'] ?? v.id ?? v['identifier'] ?? ''
-            ),
-          }))
-          .filter((v) => v.id && allowed.includes(v.id));
-        available.sort((a, b) => allowed.indexOf(a.id) - allowed.indexOf(b.id));
-        if (available.length > 0) {
-          this.versions.set(available);
-          if (!available.some((v) => v.id === this.versionId())) {
-            this.versionId.set(available[0].id);
-          }
-        }
-      },
-      error: () => {},
-    });
+  /* =========================================================
+     Language / version changes
+     ========================================================= */
+
+  onLanguageChange(code: string) {
+    this.languageCode.set(code);
+    const first = this.availableVersions()[0];
+    if (first) {
+      this.versionId.set(first.id);
+      // The effect() above will trigger loadChapter when versionId changes
+    }
+  }
+
+  onVersionChange(id: string) {
+    this.versionId.set(id);
   }
 
   /* =========================================================
@@ -123,25 +134,24 @@ export class BibleComponent {
     const version = this.versionId();
     const book = this.bookId();
     const chapter = this.chapterNum();
+    const lang = this.languageCode();
 
     this.loading.set(true);
     this.error.set('');
     this.verses.set([]);
     this.chapterRead.set(false);
 
-    // Fetch chapter, read status, and highlights in parallel
     this.bible.chapter(version, book, chapter).subscribe({
       next: (res) => {
         const normalized = this.normalizeVerses(res);
         this.verses.set(normalized);
         this.loading.set(false);
 
-        // Now fetch highlights + read status
         this.loadAnnotations(version, book, chapter);
 
         this.router.navigate([], {
           relativeTo: this.route,
-          queryParams: { book, chapter, version },
+          queryParams: { book, chapter, version, lang },
           queryParamsHandling: 'merge',
           replaceUrl: true,
         });
@@ -158,13 +168,11 @@ export class BibleComponent {
   }
 
   private loadAnnotations(version: string, book: string, chapter: number) {
-    // Read status
     this.api.readStatus(book, chapter).subscribe({
       next: (r) => this.chapterRead.set(r.read),
       error: () => {},
     });
 
-    // Highlights — merge into verses
     this.api.chapterHighlights(version, book, chapter).subscribe({
       next: (list) => {
         const byVerse = new Map<number, { id: string; color: string }>();
@@ -183,30 +191,42 @@ export class BibleComponent {
   }
 
   private normalizeVerses(res: any): DisplayVerse[] {
-    if (Array.isArray(res?.data)) {
-      return res.data.map((v: any) => ({
-        number: parseInt(String(v.verse ?? 0), 10),
-        text: String(v.text ?? '').trim(),
-      }));
+    const arr: any[] | undefined =
+      res?.data ?? res?.verses ?? res?.chapter?.verses;
+
+    if (Array.isArray(arr)) {
+      const cleaned: any[] = [];
+      let expected = 1;
+      let seenFirst = false;
+
+      for (const v of arr) {
+        const num = parseInt(String(v.verse ?? v.number), 10);
+        if (isNaN(num)) continue;
+
+        // Guard: stop when verse 1 repeats (duplicated chapter in the JSON)
+        if (num === 1) {
+          if (seenFirst) break;
+          seenFirst = true;
+        }
+
+        if (num === expected) {
+          cleaned.push({
+            number: num,
+            text: String(v.text ?? '').trim(),
+          });
+          expected++;
+        }
+      }
+      return cleaned;
     }
-    if (Array.isArray(res?.verses)) {
-      return res.verses.map((v: any) => ({
-        number: parseInt(String(v.verse ?? v.number ?? 0), 10),
-        text: String(v.text ?? '').trim(),
-      }));
-    }
-    if (Array.isArray(res?.chapter?.verses)) {
-      return res.chapter.verses.map((v: any) => ({
-        number: parseInt(String(v.verse ?? v.number ?? 0), 10),
-        text: String(v.text ?? '').trim(),
-      }));
-    }
+
     if (res?.text) {
       return [{
         number: parseInt(String(res?.verse?.number ?? res?.verse ?? 1), 10),
         text: String(res.text).trim(),
       }];
     }
+
     return [];
   }
 
@@ -251,12 +271,9 @@ export class BibleComponent {
 
   applyHighlight(verseNum: number, color: string) {
     const existing = this.verses().find((v) => v.number === verseNum);
-    if (existing?.highlightId) {
-      // Same color → remove
-      if (existing.highlightColor === color) {
-        this.removeHighlight(verseNum);
-        return;
-      }
+    if (existing?.highlightId && existing.highlightColor === color) {
+      this.removeHighlight(verseNum);
+      return;
     }
 
     this.highlightBusy.set(verseNum);
@@ -363,8 +380,14 @@ export class BibleComponent {
      Helpers
      ========================================================= */
 
+  /** Display helper for the book <select> dropdown. */
+  displayBookName(book: BibleBook): string {
+    return bookName(book, this.languageCode());
+  }
+
+  /** e.g. "Mwanzo 1" in Swahili, "Genesis 1" in English. */
   currentReference(): string {
-    return `${this.currentBook().name} ${this.chapterNum()}`;
+    return `${this.currentBookName()} ${this.chapterNum()}`;
   }
 
   isPrevDisabled(): boolean {
@@ -381,7 +404,7 @@ export class BibleComponent {
     const text = this.verses().map((v) => `${v.number}. ${v.text}`).join('\n\n');
     try {
       await navigator.clipboard.writeText(
-        `${this.currentBook().name} ${this.chapterNum()}\n\n${text}`
+        `${this.currentBookName()} ${this.chapterNum()}\n\n${text}`
       );
     } catch {}
   }

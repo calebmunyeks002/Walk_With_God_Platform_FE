@@ -31,21 +31,38 @@ export interface AuthResponse {
 
 /* ---------- Community ---------- */
 
+export type PostType = 'NORMAL' | 'PRAYER' | 'SHARED';
+export type FeedFilter = | 'ALL' | 'FOLLOWING' | 'MENTORS' | 'PRAYER' | 'MY_COMMUNITIES';
+export type ReactionType = 'LIKE' | 'LOVE' | 'AMEN' | 'PRAY';
+
+export interface ReactionBreakdown {
+  like: number;
+  love: number;
+  amen: number;
+  pray: number;
+  total: number;
+}
+
 export interface Post {
   id: string;
   author: User;
   content: string;
   scriptureReference?: string | null;
   imageUrl?: string | null;
-  reactions: number;
+  mediaId?: string | null;
+  mediaType?: 'IMAGE' | 'VIDEO' | null;
+  type: PostType;
+  sharedFromId?: string | null;
+  sharedFrom?: Post | null;
+  reactionBreakdown: ReactionBreakdown;
+  myReaction?: ReactionType | null;
   comments: number;
-  reacted?: boolean;
   createdAt: string;
+  communityId?: string | null;
 }
 
 export interface Comment {
   id: string;
-  postId: string;
   author: User;
   content: string;
   createdAt: string;
@@ -59,7 +76,11 @@ export interface Reaction {
   createdAt: string;
 }
 
-export type ReactionType = 'LIKE' | 'AMEN' | 'PRAY' | 'LOVE';
+export interface FollowStats {
+  followers: number;
+  following: number;
+  followedByMe: boolean;
+}
 
 /* ---------- Mentorship ---------- */
 
@@ -132,6 +153,8 @@ export interface Devotion {
   scripture: string;
   body: string;
   author: string;
+  featured?: boolean;
+  systemGenerated?: boolean;
   publishedAt: string;
 }
 
@@ -177,6 +200,48 @@ export interface GrowthStats {
   dayStreak: number;
   versesRead: number;
   devotionsRead: number;
+}
+
+/* ---------- Prayer ---------- */
+
+export interface Prayer {
+  id: string;
+  slot: 'MORNING' | 'EVENING';
+  title: string;
+  body: string;
+  scripture: string;
+  date: string;
+  systemGenerated: boolean;
+}
+
+export interface DailyPrayers {
+  morning?: Prayer;
+  evening?: Prayer;
+}
+
+/* ---------- Media (Batch 3) ---------- */
+
+export type MediaType = 'IMAGE' | 'VIDEO';
+export type ModerationStatus =
+  | 'PENDING' | 'APPROVED' | 'FLAGGED' | 'REJECTED' | 'DELETED';
+
+export interface Media {
+  id: string;
+  type: MediaType;
+  status: ModerationStatus;
+  contentType: string;
+  sizeBytes: number;
+  width?: number | null;
+  height?: number | null;
+  durationSeconds?: number | null;
+  flaggedReason?: string | null;
+  createdAt: string;
+}
+
+export interface AdminMedia extends Media {
+  uploaderId: string;
+  originalFilename: string;
+  checksumSha256: string;
 }
 
 /* ---------- Admin / System ---------- */
@@ -229,7 +294,7 @@ export interface AuditLog {
   action: AuditAction | string;
   targetType?: string | null;
   targetId?: string | null;
-  reason?: string | null;      // ← ADD THIS
+  reason?: string | null;
   ipAddress?: string | null;
   userAgent?: string | null;
   metadata?: Record<string, unknown> | null;
@@ -278,4 +343,61 @@ export interface AuditFilter {
   success?: boolean | 'ALL';
   page?: number;
   size?: number;
+}
+/* ---------- Communities (Batch 4) ---------- */
+
+export type CommunityVisibility = 'PUBLIC' | 'PRIVATE';
+export type CommunityRole = 'OWNER' | 'MODERATOR' | 'MEMBER';
+export type CommunityMode = 'discover' | 'mine';
+export type JoinRequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
+export interface Community {
+  id: string;
+  name: string;
+  slug: string;
+  description?: string | null;
+  coverImageUrl?: string | null;
+  iconEmoji: string;
+  visibility: CommunityVisibility;
+  memberCount: number;
+  postCount: number;
+  creatorId: string;
+  creatorName: string;
+  createdAt: string;
+  isMember: boolean;
+  myRole?: CommunityRole | null;
+  pendingRequests: number;
+}
+
+export interface CommunityMemberView {
+  userId: string;
+  name: string;
+  email: string;
+  avatarUrl?: string | null;
+  role: CommunityRole;
+  joinedAt: string;
+}
+
+export interface CommunityJoinRequestView {
+  id: string;
+  userId: string;
+  name: string;
+  avatarUrl?: string | null;
+  message?: string | null;
+  status: JoinRequestStatus;
+  createdAt: string;
+}
+
+export interface AdminCommunity {
+  id: string;
+  name: string;
+  slug: string;
+  iconEmoji: string;
+  visibility: CommunityVisibility;
+  memberCount: number;
+  postCount: number;
+  hidden: boolean;
+  hiddenReason?: string | null;
+  creatorId: string;
+  createdAt: string;
 }

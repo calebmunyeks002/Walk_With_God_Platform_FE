@@ -1,0 +1,60 @@
+<section class="page-head">
+  <div>
+    <span class="eyebrow">PRAYER</span>
+    <h1>Today's Prayers</h1>
+    <p>Begin and end your day in the presence of God.</p>
+  </div>
+</section>
+
+@if (loading()) {
+  <div class="state">
+    <div class="spinner"></div>
+    <p>Loading prayers…</p>
+  </div>
+} @else {
+  <div class="prayer-grid">
+    @if (prayers().morning; as m) {
+      <article class="prayer-card morning" [class.highlight]="isMorning()">
+        <header>
+          <span class="slot-icon">🌅</span>
+          <div>
+            <span class="slot-label">Morning Prayer</span>
+            <h2>{{ m.title }}</h2>
+          </div>
+        </header>
+        <p class="body">{{ m.body }}</p>
+        @if (m.scripture) {
+          <div class="scripture">📖 {{ m.scripture }}</div>
+        }
+        <footer>
+          <span class="date">{{ m.date }}</span>
+          @if (m.systemGenerated) {
+            <span class="badge">Auto-generated</span>
+          }
+        </footer>
+      </article>
+    }
+
+    @if (prayers().evening; as e) {
+      <article class="prayer-card evening" [class.highlight]="!isMorning()">
+        <header>
+          <span class="slot-icon">🌙</span>
+          <div>
+            <span class="slot-label">Evening Prayer</span>
+            <h2>{{ e.title }}</h2>
+          </div>
+        </header>
+        <p class="body">{{ e.body }}</p>
+        @if (e.scripture) {
+          <div class="scripture">📖 {{ e.scripture }}</div>
+        }
+        <footer>
+          <span class="date">{{ e.date }}</span>
+          @if (e.systemGenerated) {
+            <span class="badge">Auto-generated</span>
+          }
+        </footer>
+      </article>
+    }
+  </div>
+}

@@ -1,0 +1,66 @@
+<section class="page-head">
+  <div>
+    <span class="eyebrow">ADMIN</span>
+    <h1>Media Review Queue</h1>
+    <p>Approve, reject, or delete uploaded media.</p>
+  </div>
+</section>
+
+<nav class="tabs">
+  @for (f of filters; track f) {
+    <button class="tab" [class.active]="filter() === f" (click)="setFilter(f)">
+      {{ f }}
+      @if (counts()[f.toLowerCase()]; as n) {
+        @if (n > 0) { <span class="pill">{{ n }}</span> }
+      }
+    </button>
+  }
+</nav>
+
+@if (loading()) {
+  <div class="state">Loading…</div>
+} @else if (items().length === 0) {
+  <div class="state">
+    <p>Nothing to review in this queue.</p>
+  </div>
+} @else {
+  <div class="media-grid">
+    @for (m of items(); track m.id) {
+      <article class="media-card">
+        <div class="thumb">
+          @if (m.type === 'VIDEO') {
+            <video [src]="rawUrl(m.id)" controls preload="metadata"></video>
+          } @else {
+            <img [src]="rawUrl(m.id)" [alt]="m.originalFilename" loading="lazy" />
+          }
+        </div>
+
+        <div class="meta">
+          <div class="row">
+            <span class="chip type">{{ m.type }}</span>
+            <span class="chip status {{ m.status.toLowerCase() }}">{{ m.status }}</span>
+          </div>
+          <p class="filename">{{ m.originalFilename }}</p>
+          <p class="details">
+            {{ humanSize(m.sizeBytes) }}
+            @if (m.width && m.height) { · {{ m.width }}×{{ m.height }} }
+            @if (m.durationSeconds) { · {{ m.durationSeconds.toFixed(1) }}s }
+          </p>
+          @if (m.flaggedReason) {
+            <p class="reason">{{ m.flaggedReason }}</p>
+          }
+        </div>
+
+        <div class="actions">
+          @if (m.status !== 'APPROVED') {
+            <button class="btn approve" (click)="approve(m)">✓ Approve</button>
+          }
+          @if (m.status !== 'REJECTED') {
+            <button class="btn reject" (click)="reject(m)">✕ Reject</button>
+          }
+          <button class="btn danger" (click)="hardDelete(m)">🗑 Delete</button>
+        </div>
+      </article>
+    }
+  </div>
+}

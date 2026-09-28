@@ -47,6 +47,28 @@ export const routes: Routes = [
           ),
       },
       {
+  path: 'communities',
+  loadComponent: () =>
+    import('./features/communities/communities.component/communities.component').then(
+      (m) => m.CommunitiesComponent
+    ),
+},
+{
+  path: 'communities/:slug',
+  loadComponent: () =>
+    import('./features/communities/community-detail.component/community-detail.component').then(
+      (m) => m.CommunityDetailComponent
+    ),
+},
+{
+  path: 'admin/communities',
+  canActivate: [roleGuard(['ADMIN'])],
+  loadComponent: () =>
+    import('./features/admin/communities/admin-communities.component/admin-communities.component').then(
+      (m) => m.AdminCommunitiesComponent
+    ),
+},
+      {
         path: 'mentors',
         loadComponent: () =>
           import('./features/mentors/mentors.component').then(
@@ -98,6 +120,13 @@ export const routes: Routes = [
           ),
       },
       {
+  path: 'prayer',
+  loadComponent: () =>
+    import('./features/prayer/prayer.component/prayer.component').then(
+      (m) => m.PrayerComponent
+    ),
+},
+      {
         path: 'profile',
         loadComponent: () =>
           import('./features/profile/profile.component').then(
@@ -119,6 +148,13 @@ export const routes: Routes = [
           //       './features/admin/overview/admin-overview.component/admin-overview.component'
           //     ).then((m) => m.AdminOverviewComponent),
           // },
+          {
+  path: 'media-review',
+  loadComponent: () =>
+    import('./features/admin/media/admin-media-review.component/admin-media-review.component').then(
+      (m) => m.AdminMediaReviewComponent
+    ),
+},
           {
             path: 'users',
             loadComponent: () =>

@@ -1,1 +1,119 @@
-<section class="page-head"><div><span class="eyebrow">MY PROFILE</span><h1>Your faith journey</h1><p>Manage your public community profile and personal preferences.</p></div></section><div class="profile-grid"><section class="profile-card"><div class="cover"></div><div class="profile-main"><div class="avatar big">{{name.charAt(0)||'U'}}</div><div class="identity"><h2>{{name||'Your name'}}</h2><span>{{auth.user()?.role||'MEMBER'}}</span><p>Member since {{auth.user()?.createdAt|date}}</p></div></div><form (ngSubmit)="save()"><label>Display name<input [(ngModel)]="name" name="name"></label><label>About you<textarea [(ngModel)]="bio" name="bio" placeholder="Share a little about your journey..."></textarea></label><button class="primary">Save profile</button><div class="saved" *ngIf="saved()">Profile updated.</div></form></section><aside><div class="card"><span class="tag">YOUR JOURNEY</span><div class="metric"><b>7</b><span>Day faith streak</span></div><div class="metric"><b>24</b><span>Scriptures read</span></div><div class="metric"><b>3</b><span>Mentor conversations</span></div></div><div class="card"><span class="tag">PRIVACY</span><p>Your private messages are visible only to conversation participants and authorized platform systems. Mentorship is spiritual guidance and does not replace professional care where needed.</p></div></aside></div>
+<section class="page-head">
+  <div>
+    <span class="eyebrow">MY PROFILE</span>
+    <h1>Profile &amp; Settings</h1>
+    <p>Manage how you appear to others and keep your account secure.</p>
+  </div>
+</section>
+
+@if (saved()) {
+  <div class="toast success">Bio saved.</div>
+}
+
+<div class="profile-grid">
+
+  <!-- Identity card -->
+  <section class="card identity-card">
+    <div class="avatar-lg">{{ auth.user()?.name?.charAt(0) || 'U' }}</div>
+    <h2>{{ auth.user()?.name }}</h2>
+    <span class="role-badge">{{ auth.user()?.role }}</span>
+    <p class="joined">Joined {{ auth.user()?.createdAt | date:'mediumDate' }}</p>
+  </section>
+
+  <!-- Editable fields -->
+  <section class="card settings-card">
+    <h3>Account details</h3>
+
+    <div class="field">
+      <label>Full name</label>
+      <div class="readonly-input">
+        <span>{{ auth.user()?.name }}</span>
+        <span class="lock" title="Only an admin can change this">🔒</span>
+      </div>
+      <small class="hint">Contact an admin if you need your name changed.</small>
+    </div>
+
+    <div class="field">
+      <label>Email</label>
+      <div class="readonly-input">
+        <span>{{ auth.user()?.email }}</span>
+        <span class="lock" title="Email is your login identity">🔒</span>
+      </div>
+      <small class="hint">Email is locked for security.</small>
+    </div>
+
+    <div class="field">
+      <label>Bio</label>
+      <textarea
+        rows="4"
+        [(ngModel)]="bio"
+        placeholder="Tell the community about yourself…"
+        maxlength="1000"></textarea>
+      <small class="char-count">{{ bio.length }} / 1000</small>
+      @if (bioError()) {
+        <small class="field-error">{{ bioError() }}</small>
+      }
+    </div>
+
+    <div class="actions">
+      <button class="btn primary" [disabled]="savingBio()" (click)="saveBio()">
+        {{ savingBio() ? 'Saving…' : 'Save bio' }}
+      </button>
+    </div>
+  </section>
+
+  <!-- Password card -->
+  <section class="card password-card">
+    <div class="card-head-row">
+      <div>
+        <h3>Password</h3>
+        <small>Change your password regularly to stay secure.</small>
+      </div>
+      <button class="btn ghost" (click)="togglePasswordForm()">
+        {{ pwOpen() ? 'Cancel' : 'Change password' }}
+      </button>
+    </div>
+
+    @if (pwOpen()) {
+      <div class="pw-form">
+        @if (pwError()) {
+          <div class="form-error">{{ pwError() }}</div>
+        }
+        @if (pwSuccess()) {
+          <div class="form-success">Password updated successfully.</div>
+        }
+
+        <label>
+          Current password
+          <input
+            type="password"
+            [(ngModel)]="currentPassword"
+            placeholder="Enter current password"
+            autocomplete="current-password" />
+        </label>
+
+        <label>
+          New password
+          <input
+            type="password"
+            [(ngModel)]="newPassword"
+            placeholder="At least 8 characters"
+            autocomplete="new-password" />
+        </label>
+
+        <label>
+          Confirm new password
+          <input
+            type="password"
+            [(ngModel)]="confirmPassword"
+            placeholder="Repeat new password"
+            autocomplete="new-password" />
+        </label>
+
+        <button class="btn primary" [disabled]="savingPw()" (click)="changePassword()">
+          {{ savingPw() ? 'Updating…' : 'Update password' }}
+        </button>
+      </div>
+    }
+  </section>
+</div>

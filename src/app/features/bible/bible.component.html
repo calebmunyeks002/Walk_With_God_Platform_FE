@@ -15,11 +15,20 @@
     </div>
 </section>
 
-<div class="picker-bar">
+<div class="picker-bar four-col">
+    <label class="picker">
+        <span>Language</span>
+        <select [ngModel]="languageCode()" (ngModelChange)="onLanguageChange($event)">
+            @for (lang of languages; track lang.code) {
+            <option [value]="lang.code">{{ lang.name }} — {{ lang.nativeName }}</option>
+            }
+        </select>
+    </label>
+
     <label class="picker">
         <span>Version</span>
-        <select [(ngModel)]="versionId" (ngModelChange)="versionId.set($event)">
-            @for (v of versions(); track v.id) {
+        <select [ngModel]="versionId()" (ngModelChange)="onVersionChange($event)">
+            @for (v of availableVersions(); track v.id) {
             <option [value]="v.id">{{ v.label }}</option>
             }
         </select>
@@ -30,12 +39,12 @@
         <select [ngModel]="bookId()" (ngModelChange)="onBookChange($event)">
             <optgroup label="Old Testament">
                 @for (b of otBooks; track b.id) {
-                <option [value]="b.id">{{ b.name }}</option>
+                <option [value]="b.id">{{ displayBookName(b) }}</option>
                 }
             </optgroup>
             <optgroup label="New Testament">
                 @for (b of ntBooks; track b.id) {
-                <option [value]="b.id">{{ b.name }}</option>
+                <option [value]="b.id">{{ displayBookName(b) }}</option>
                 }
             </optgroup>
         </select>
@@ -55,7 +64,7 @@
     <header class="reader-head">
         <div>
             <span class="eyebrow">{{ currentReference() }}</span>
-            <h2>{{ currentBook().name }} {{ chapterNum() }}</h2>
+            <h2>{{ currentBookName() }} {{ chapterNum() }}</h2>
             @if (chapterRead()) {
             <span class="read-badge">✓ Read</span>
             }
@@ -114,12 +123,19 @@
     </div>
 
     <footer class="reader-footer">
-        <button class="btn ghost" [disabled]="isPrevDisabled()" (click)="prevChapter()">
-            ← Previous
-        </button>
-        <span class="footer-ref">{{ currentReference() }}</span>
-        <button class="btn ghost" [disabled]="isNextDisabled()" (click)="nextChapter()">
-            Next →
+        <div class="footer-nav">
+            <button class="btn ghost" [disabled]="isPrevDisabled()" (click)="prevChapter()">
+                ← Previous
+            </button>
+            <span class="footer-ref">{{ currentReference() }}</span>
+            <button class="btn ghost" [disabled]="isNextDisabled()" (click)="nextChapter()">
+                Next →
+            </button>
+        </div>
+
+        <button class="btn read-btn" [class.primary]="!chapterRead()" [class.success]="chapterRead()"
+            [disabled]="readBusy()" (click)="toggleChapterRead()">
+            {{ chapterRead() ? '✓ Marked as read' : '✓ Mark as read' }}
         </button>
     </footer>
     }

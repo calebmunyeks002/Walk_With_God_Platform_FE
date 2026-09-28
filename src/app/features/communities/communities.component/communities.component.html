@@ -1,0 +1,126 @@
+<section class="page-head">
+  <div>
+    <span class="eyebrow">COMMUNITIES</span>
+    <h1>Walk in Circles</h1>
+    <p>Join communities that match your season of life.</p>
+  </div>
+  @if (canCreate()) {
+    <button class="btn primary" (click)="openCreate()">✚ New Community</button>
+  }
+</section>
+
+<nav class="mode-tabs">
+  <button class="tab" [class.active]="mode() === 'discover'" (click)="setMode('discover')">
+    🔭 Discover
+  </button>
+  <button class="tab" [class.active]="mode() === 'mine'" (click)="setMode('mine')">
+    👥 My Communities
+  </button>
+</nav>
+
+@if (loading()) {
+  <div class="state"><div class="spinner"></div><p>Loading communities…</p></div>
+} @else if (communities().length === 0) {
+  <div class="state">
+    <p>{{ mode() === 'mine' ? 'You haven\'t joined any community yet.' : 'No communities yet.' }}</p>
+    @if (canCreate()) {
+      <button class="btn primary" (click)="openCreate()">Create the first one</button>
+    }
+  </div>
+} @else {
+  <div class="grid">
+    @for (c of communities(); track c.id) {
+      <article class="community-card" [class.private]="c.visibility === 'PRIVATE'">
+        <a class="cover" [routerLink]="['/communities', c.slug]">
+          @if (c.coverImageUrl) {
+            <img [src]="c.coverImageUrl" [alt]="c.name" />
+          } @else {
+            <div class="cover-icon">{{ c.iconEmoji }}</div>
+          }
+        </a>
+
+        <div class="body">
+          <div class="title-row">
+            <a class="name" [routerLink]="['/communities', c.slug]">{{ c.name }}</a>
+            @if (c.visibility === 'PRIVATE') {
+              <span class="badge private">🔒 Private</span>
+            }
+            @if (c.myRole === 'OWNER') {
+              <span class="badge owner">Owner</span>
+            } @else if (c.myRole === 'MODERATOR') {
+              <span class="badge mod">Mod</span>
+            }
+          </div>
+
+          <p class="desc">{{ c.description || 'No description yet.' }}</p>
+
+          <div class="stats">
+            <span>👥 {{ c.memberCount }} members</span>
+            <span>📝 {{ c.postCount }} posts</span>
+          </div>
+
+          <div class="actions">
+            @if (c.isMember) {
+              <a class="btn ghost" [routerLink]="['/communities', c.slug]">Open</a>
+              <button class="btn danger" (click)="leave(c)">Leave</button>
+            } @else if (c.visibility === 'PUBLIC') {
+              <button class="btn primary" (click)="join(c)">Join</button>
+            } @else {
+              <button class="btn primary" (click)="join(c)">Request to Join</button>
+            }
+          </div>
+        </div>
+      </article>
+    }
+  </div>
+}
+
+<!-- Create modal -->
+@if (creating()) {
+  <div class="overlay" (click)="closeCreate()"></div>
+  <div class="modal">
+    <header>
+      <h3>Create Community</h3>
+      <button class="x" (click)="closeCreate()">✕</button>
+    </header>
+
+    <label class="field">
+      <span>Name</span>
+      <input type="text" [(ngModel)]="newName" maxlength="120" placeholder="e.g. Youth Ministry" />
+    </label>
+
+    <label class="field">
+      <span>Description</span>
+      <textarea [(ngModel)]="newDescription" maxlength="2000" rows="3"
+        placeholder="What is this community about?"></textarea>
+    </label>
+
+    <label class="field">
+      <span>Icon</span>
+      <div class="emoji-row">
+        @for (e of emojiChoices; track e) {
+          <button class="emoji" [class.selected]="newIcon === e" (click)="newIcon = e">{{ e }}</button>
+        }
+      </div>
+    </label>
+
+    <label class="field">
+      <span>Visibility</span>
+      <div class="visibility-row">
+        <button class="vis" [class.active]="newVisibility === 'PUBLIC'"
+          (click)="newVisibility = 'PUBLIC'">🌍 Public — anyone can join</button>
+        <button class="vis" [class.active]="newVisibility === 'PRIVATE'"
+          (click)="newVisibility = 'PRIVATE'">🔒 Private — approval needed</button>
+      </div>
+    </label>
+
+    @if (error()) { <div class="error">{{ error() }}</div> }
+
+    <div class="modal-actions">
+      <button class="btn ghost" (click)="closeCreate()">Cancel</button>
+      <button class="btn primary" [disabled]="saving()" (click)="save()">
+        {{ saving() ? 'Creating…' : 'Create Community' }}
+      </button>
+    </div>
+  </div>
+}

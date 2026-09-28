@@ -34,7 +34,7 @@
 } @else {
 
 <!-- Completion banner -->
-@if ((completed() || finished()) && passed()) {
+@if (finished() && passed()) {
 <div class="banner success">
     <div>
         <b>✓ Passed — {{ score() }}/{{ total() }}</b>
@@ -43,11 +43,11 @@
     <button class="btn ghost" (click)="retake()">Retake</button>
 </div>
 }
-@if ((completed() || finished()) && !passed()) {
+@if (finished() && !passed()) {
 <div class="banner fail">
     <div>
         <b>Not quite there — {{ score() }}/{{ total() }}</b>
-        <small>You need 3 of 5 correct to pass. Give it another shot.</small>
+        <small>You need 60% correct to pass. Review below then try again.</small>
     </div>
     <button class="btn primary" (click)="retake()">Retake</button>
 </div>
@@ -83,6 +83,67 @@
         <button class="btn primary" [disabled]="selected() === null || submitting()" (click)="next()">
             {{ currentIndex() + 1 === questions().length ? 'Finish' : 'Next →' }}
         </button>
+    </div>
+</div>
+}
+
+<!-- Review panel -->
+@if (finished()) {
+<div class="card review-card">
+    <div class="review-head">
+        <div>
+            <h3>Review your answers</h3>
+            <small>{{ wrongCount() }} wrong · {{ questions().length - wrongCount() }} correct</small>
+        </div>
+        <div class="review-tabs">
+            <button
+                class="rtab"
+                [class.active]="reviewFilter() === 'ALL'"
+                (click)="reviewFilter.set('ALL')">
+                All ({{ questions().length }})
+            </button>
+            <button
+                class="rtab"
+                [class.active]="reviewFilter() === 'WRONG'"
+                (click)="reviewFilter.set('WRONG')">
+                Wrong only ({{ wrongCount() }})
+            </button>
+        </div>
+    </div>
+
+    <div class="review-list">
+        @for (q of reviewQuestions(); track q.id) {
+        <div class="review-item" [class.correct]="isCorrect(q)" [class.wrong]="!isCorrect(q)">
+            <div class="ri-head">
+                <span class="ri-status">{{ isCorrect(q) ? '✓' : '✗' }}</span>
+                <span class="ri-text">{{ q.question }}</span>
+            </div>
+
+            <div class="ri-options">
+                @for (opt of q.options; track $index) {
+                <div
+                    class="ri-opt"
+                    [class.correct-opt]="$index === q.correctIndex"
+                    [class.wrong-chosen]="$index === chosen(q) && $index !== q.correctIndex">
+                    <span class="ri-letter">{{ optionLetter($index) }}</span>
+                    <span class="ri-label">{{ opt }}</span>
+                    @if ($index === q.correctIndex) {
+                    <span class="ri-tag">Correct</span>
+                    }
+                    @if ($index === chosen(q) && $index !== q.correctIndex) {
+                    <span class="ri-tag wrong-tag">Your answer</span>
+                    }
+                </div>
+                }
+            </div>
+        </div>
+        }
+
+        @if (reviewQuestions().length === 0) {
+        <div class="review-empty">
+            🎉 You got everything right!
+        </div>
+        }
     </div>
 </div>
 }

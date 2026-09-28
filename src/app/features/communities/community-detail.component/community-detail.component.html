@@ -1,0 +1,147 @@
+@if (loading()) {
+<div class="state">
+    <div class="spinner"></div>
+    <p>Loading community…</p>
+</div>
+} @else if (!community()) {
+<div class="state">
+    <p>Community not found.</p>
+</div>
+} @else {
+@if (community(); as c) {
+
+<header class="hero" [class.private]="c.visibility === 'PRIVATE'">
+    @if (c.coverImageUrl) {
+    <img class="cover" [src]="c.coverImageUrl" [alt]="c.name" />
+    } @else {
+    <div class="cover icon">{{ c.iconEmoji }}</div>
+    }
+
+    <div class="hero-body">
+        <div class="title-row">
+            <h1>{{ c.iconEmoji }} {{ c.name }}</h1>
+            @if (c.visibility === 'PRIVATE') {
+            <span class="badge private">🔒 Private</span>
+            }
+        </div>
+        <p class="desc">{{ c.description || 'No description yet.' }}</p>
+        <div class="stats">
+            <span>👥 {{ c.memberCount }} members</span>
+            <span>📝 {{ c.postCount }} posts</span>
+            <span>👑 {{ c.creatorName }}</span>
+        </div>
+
+        <div class="actions">
+            @if (c.isMember) {
+            <button class="btn danger" (click)="leave()">Leave community</button>
+            } @else if (c.visibility === 'PUBLIC') {
+            <button class="btn primary" (click)="join()">Join community</button>
+            } @else {
+            <button class="btn primary" (click)="join()">Request to join</button>
+            }
+        </div>
+    </div>
+</header>
+
+@if (c.isMember) {
+<nav class="tabs">
+    <button class="tab" [class.active]="tab() === 'feed'" (click)="tab.set('feed')">Feed</button>
+    <button class="tab" [class.active]="tab() === 'members'" (click)="tab.set('members')">
+        Members ({{ c.memberCount }})
+    </button>
+    @if (canManage(c)) {
+    <button class="tab" [class.active]="tab() === 'requests'" (click)="tab.set('requests')">
+        Join Requests @if (c.pendingRequests > 0) { <span class="pill">{{ c.pendingRequests }}</span> }
+    </button>
+    }
+</nav>
+
+@if (tab() === 'feed') {
+<section class="feed-section">
+    @if (canPost()) {
+    <div class="composer">
+        @if (!composerOpen()) {
+        <button class="open-composer" (click)="composerOpen.set(true)">
+            Share something with {{ c.name }}…
+        </button>
+        } @else {
+        <textarea [(ngModel)]="content" rows="3" maxlength="5000" placeholder="Share with the community…"></textarea>
+        <input type="text" [(ngModel)]="scripture" maxlength="160" placeholder="Scripture reference (optional)" />
+        <div class="composer-actions">
+            <button class="btn ghost" (click)="composerOpen.set(false)">Cancel</button>
+            <button class="btn primary" [disabled]="!content.trim() || publishing()" (click)="publish()">
+                {{ publishing() ? 'Posting…' : 'Publish' }}
+            </button>
+        </div>
+        }
+    </div>
+    }
+
+    @if (posts().length === 0) {
+    <div class="state">
+        <p>No posts yet. Be the first to share!</p>
+    </div>
+    } @else {
+    <div class="feed">
+        @for (p of posts(); track p.id) {
+        <app-post-card [post]="p" (updated)="posts.update(list => list.map(x => x.id === p.id ? $event : x))"
+            (deleted)="posts.update(list => list.filter(x => x.id !== $event))" />
+        }
+    </div>
+    }
+</section>
+}
+
+@if (tab() === 'members') {
+<section class="members-section">
+    @for (m of members(); track m.userId) {
+    <div class="member-row">
+        <div class="avatar">
+            @if (m.avatarUrl) { <img [src]="m.avatarUrl" [alt]="m.name" /> }
+            @else { <span>{{ m.name.charAt(0).toUpperCase() }}</span> }
+        </div>
+        <div class="info">
+            <strong>{{ m.name }}</strong>
+            <small>{{ m.role }}</small>
+        </div>
+        @if (canDeleteMember(m)) {
+        <button class="remove" (click)="removeMember(m)" title="Remove">✕</button>
+        }
+    </div>
+    }
+</section>
+}
+
+@if (tab() === 'requests' && canManage(c)) {
+<section class="requests-section">
+    @if (requests().length === 0) {
+    <div class="state">
+        <p>No pending join requests.</p>
+    </div>
+    } @else {
+    @for (r of requests(); track r.id) {
+    <div class="request-row">
+        <div class="avatar">
+            @if (r.avatarUrl) { <img [src]="r.avatarUrl" [alt]="r.name" /> }
+            @else { <span>{{ r.name.charAt(0).toUpperCase() }}</span> }
+        </div>
+        <div class="info">
+            <strong>{{ r.name }}</strong>
+            @if (r.message) { <p>{{ r.message }}</p> }
+        </div>
+        <div class="buttons">
+            <button class="btn approve" (click)="approve(r)">Approve</button>
+            <button class="btn reject" (click)="reject(r)">Reject</button>
+        </div>
+    </div>
+    }
+    }
+</section>
+}
+} @else {
+<div class="state">
+    <p>Join this community to see posts and members.</p>
+</div>
+}
+}
+}
