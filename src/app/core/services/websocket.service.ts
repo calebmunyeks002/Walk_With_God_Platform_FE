@@ -2,6 +2,7 @@ import { Injectable, inject, signal, OnDestroy } from '@angular/core';
 import { Client, IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { AuthService } from './auth.service';
+import { environment } from '../../../environments/environment';
 
 export interface LiveMessage {
   id: string;
@@ -30,8 +31,7 @@ export class WebSocketService implements OnDestroy {
     if (!userId) return;
 
     this.client = new Client({
-      webSocketFactory: () => new SockJS('/ws') as any,
-      reconnectDelay: 5000,
+      webSocketFactory: () => new SockJS(environment.wsUrl) as any,      reconnectDelay: 5000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
       debug: () => {

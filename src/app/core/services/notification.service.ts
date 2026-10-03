@@ -3,7 +3,7 @@ import { Client, IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { AuthService } from './auth.service';
 import { ApiService } from './api.service';
-
+import { environment } from '../../../environments/environment';
 export interface NotificationView {
   id: string;
   type: string;
@@ -59,8 +59,7 @@ export class NotificationService {
 
     if (this.client?.active) return;
     this.client = new Client({
-      webSocketFactory: () => new SockJS('/ws') as any,
-      reconnectDelay: 5000,
+      webSocketFactory: () => new SockJS(environment.wsUrl) as any,      reconnectDelay: 5000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
     });
