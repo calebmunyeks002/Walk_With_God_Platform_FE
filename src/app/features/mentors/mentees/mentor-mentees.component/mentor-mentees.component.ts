@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
 
 interface MenteeView {
@@ -23,12 +23,13 @@ interface MenteeView {
 @Component({
   standalone: true,
   selector: 'app-mentor-mentees',
-  imports: [CommonModule, FormsModule, RouterLink],
+  imports: [CommonModule, FormsModule],
   templateUrl: './mentor-mentees.component.html',
   styleUrl: './mentor-mentees.component.scss',
 })
 export class MentorMenteesComponent {
   api = inject(ApiService);
+  private router = inject(Router);
 
   mentees = signal<MenteeView[]>([]);
   loading = signal(true);
@@ -96,6 +97,17 @@ export class MentorMenteesComponent {
         this.error.set(e?.error?.message || 'Failed to load mentees.');
         this.loading.set(false);
       },
+    });
+  }
+
+  /**
+   * Opens the inbox at the conversation with the given user.
+   * If no conversation exists yet, the inbox will create one on the fly.
+   */
+  openChat(memberUserId: string) {
+    if (!memberUserId) return;
+    this.router.navigate(['/inbox'], {
+      queryParams: { user: memberUserId },
     });
   }
 

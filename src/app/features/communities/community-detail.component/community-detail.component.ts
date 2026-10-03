@@ -13,7 +13,7 @@ import { PostCardComponent } from '../../community/components/post-card.componen
 @Component({
   standalone: true,
   selector: 'app-community-detail',
-  imports: [CommonModule, FormsModule, RouterLink, PostCardComponent],
+  imports: [CommonModule, FormsModule, PostCardComponent],
   templateUrl: './community-detail.component.html',
   styleUrl: './community-detail.component.scss',
 })

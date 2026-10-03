@@ -365,3 +365,39 @@
         cursor: not-allowed;
     }
 }
+
+.conv-item {
+    position: relative;
+
+    &.unread {
+        background: #faf6ff;
+
+        strong {
+            font-weight: 800;
+            color: #2a1740;
+        }
+
+        small {
+            color: #4e177e;
+            font-weight: 700;
+        }
+    }
+
+    .unread-badge {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        min-width: 22px;
+        height: 22px;
+        padding: 0 7px;
+        border-radius: 11px;
+        background: #1f7a45;
+        color: #fff;
+        font-size: 11px;
+        font-weight: 800;
+        display: grid;
+        place-items: center;
+        box-shadow: 0 2px 6px rgba(31, 122, 69, .35);
+    }
+}

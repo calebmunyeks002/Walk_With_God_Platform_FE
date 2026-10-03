@@ -59,7 +59,13 @@
 <div class="mentee-grid">
     @for (m of visibleMentees(); track m.requestId) {
     <article class="mentee-card">
-        <div class="avatar lg">{{ m.member.name.charAt(0) }}</div>
+        <div class="avatar lg">
+            @if (m.member.avatarUrl) {
+            <img [src]="m.member.avatarUrl" [alt]="m.member.name" />
+            } @else {
+            {{ m.member.name.charAt(0) }}
+            }
+        </div>
         <div class="info">
             <h3>{{ m.member.name }}</h3>
             <small>{{ m.member.email }}</small>
@@ -70,9 +76,9 @@
                 <span class="since">Since {{ timeAgo(m.since) }}</span>
             </div>
         </div>
-        <a routerLink="/inbox" class="btn primary" title="Open inbox">
+        <button class="btn primary" (click)="openChat(m.member.id)" title="Open chat">
             Message
-        </a>
+        </button>
     </article>
     }
 </div>

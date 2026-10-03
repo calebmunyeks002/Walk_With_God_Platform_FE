@@ -5,8 +5,11 @@ import {
   Post, Comment, ReactionType, ReactionBreakdown, PostType, FeedFilter,
   FollowStats, Prayer, DailyPrayers,
   Mentor, Conversation, Message, Devotion, TriviaQuestion, User, Role,
-  Page, SystemStats, AuditLog, AuditFilter, UserFilter, MentorApplication,Community, CommunityMode, CommunityVisibility, CommunityMemberView,
-  CommunityJoinRequestView, AdminCommunity,
+  Page, SystemStats, AuditLog, AuditFilter, UserFilter, MentorApplication,
+  Community, CommunityMode, CommunityVisibility, CommunityMemberView,
+  CommunityJoinRequestView,
+  MentorshipRequest, MyMentorshipState,
+  AdminCommunity,
 } from '../models/models';
 
 /** Backend conversation shape (from ConversationController). */
@@ -15,6 +18,7 @@ export interface ConversationView {
   participantIds: string[];
   title: string;
   lastMessage: string | null;
+  unreadCount: number;      // ← ADD
   updatedAt: string;
 }
 
@@ -34,7 +38,9 @@ export class ApiService {
   private http = inject(HttpClient);
   private base = '/api';
 
-  /* ---------------- Generic helpers ---------------- */
+  /* =========================================================
+     Generic helpers
+     ========================================================= */
 
   get<T>(
     path: string,
@@ -63,181 +69,177 @@ export class ApiService {
     return this.http.delete<T>(this.base + path);
   }
 
-  /* ---------------- Community ---------------- */
+  /* =========================================================
+     Community feed & posts
+     ========================================================= */
 
   posts(page = 0, size = 20) {
     return this.get<Page<Post>>('/posts', { page, size });
+  }
+
+  postsFiltered(filter: FeedFilter, page = 0, size = 20) {
+    return this.get<Page<Post>>('/posts', { filter, page, size });
+  }
+
+  postsByCommunity(communityId: string, page = 0, size = 20) {
+    return this.get<Page<Post>>(`/posts/community/${communityId}`, { page, size });
   }
 
   createPost(content: string, scriptureReference?: string) {
     return this.post<Post>('/posts', { content, scriptureReference });
   }
 
-  react(postId: string, type = 'LIKE') {
-    return this.post<void>(`/posts/${postId}/reactions`, { type });
+  createPostFull(body: {
+    content: string;
+    scriptureReference?: string;
+    imageUrl?: string;
+    type?: PostType;
+    mediaId?: string;
+    communityId?: string;
+  }) {
+    return this.post<Post>('/posts', body);
+  }
+
+  deletePost(postId: string) {
+    return this.delete<void>(`/posts/${postId}`);
+  }
+
+  sharePost(postId: string, content?: string) {
+    return this.post<Post>(`/posts/${postId}/share`, { content });
+  }
+
+  reactToPost(postId: string, type: ReactionType) {
+    return this.post<ReactionBreakdown>(`/posts/${postId}/reactions`, { type });
+  }
+
+  unreactToPost(postId: string) {
+    return this.delete<ReactionBreakdown>(`/posts/${postId}/reactions`);
+  }
+
+  postComments(postId: string) {
+    return this.get<Comment[]>(`/posts/${postId}/comments`);
+  }
+
+  addComment(postId: string, content: string) {
+    return this.post<Comment>(`/posts/${postId}/comments`, { content });
+  }
+
+  deleteComment(postId: string, commentId: string) {
+    return this.delete<void>(`/posts/${postId}/comments/${commentId}`);
   }
 
   /* =========================================================
-   Community — Batch 2
-   ========================================================= */
+     Communities
+     ========================================================= */
 
-postsFiltered(filter: FeedFilter, page = 0, size = 20) {
-  return this.get<Page<Post>>('/posts', { filter, page, size });
-}
+  communities(mode: CommunityMode = 'discover', page = 0, size = 20) {
+    return this.get<Page<Community>>('/communities', { mode, page, size });
+  }
 
-createPostFull(body: {
-  content: string;
-  scriptureReference?: string;
-  imageUrl?: string;
-  type?: PostType;
-  mediaId?: string;
-  communityId?: string;
-}) {
-  return this.post<Post>('/posts', body);
-}
+  community(slug: string) {
+    return this.get<Community>(`/communities/${slug}`);
+  }
 
-deletePost(postId: string) {
-  return this.delete<void>(`/posts/${postId}`);
-}
+  createCommunity(body: {
+    name: string;
+    description?: string;
+    coverImageUrl?: string;
+    iconEmoji?: string;
+    visibility?: CommunityVisibility;
+  }) {
+    return this.post<Community>('/communities', body);
+  }
 
-sharePost(postId: string, content?: string) {
-  return this.post<Post>(`/posts/${postId}/share`, { content });
-}
+  updateCommunity(id: string, body: Partial<{
+    name: string;
+    description: string;
+    coverImageUrl: string;
+    iconEmoji: string;
+    visibility: CommunityVisibility;
+  }>) {
+    return this.patch<Community>(`/communities/${id}`, body);
+  }
 
-reactToPost(postId: string, type: ReactionType) {
-  return this.post<ReactionBreakdown>(`/posts/${postId}/reactions`, { type });
-}
+  deleteCommunity(id: string) {
+    return this.delete<void>(`/communities/${id}`);
+  }
 
-unreactToPost(postId: string) {
-  return this.delete<ReactionBreakdown>(`/posts/${postId}/reactions`);
-}
+  joinCommunity(id: string) {
+    return this.post<Community>(`/communities/${id}/join`, {});
+  }
 
-postComments(postId: string) {
-  return this.get<Comment[]>(`/posts/${postId}/comments`);
-}
+  leaveCommunity(id: string) {
+    return this.delete<void>(`/communities/${id}/leave`);
+  }
 
-addComment(postId: string, content: string) {
-  return this.post<Comment>(`/posts/${postId}/comments`, { content });
-}
+  communityMembers(id: string) {
+    return this.get<CommunityMemberView[]>(`/communities/${id}/members`);
+  }
 
-deleteComment(postId: string, commentId: string) {
-  return this.delete<void>(`/posts/${postId}/comments/${commentId}`);
-}
+  removeCommunityMember(communityId: string, userId: string) {
+    return this.delete<void>(`/communities/${communityId}/members/${userId}`);
+  }
 
-/* =========================================================
-   Communities — Batch 4
-   ========================================================= */
+  communityJoinRequests(id: string) {
+    return this.get<CommunityJoinRequestView[]>(`/communities/${id}/requests`);
+  }
 
-communities(mode: CommunityMode = 'discover', page = 0, size = 20) {
-  return this.get<Page<Community>>('/communities', { mode, page, size });
-}
+  approveJoinRequest(communityId: string, requestId: string) {
+    return this.post<void>(`/communities/${communityId}/requests/${requestId}/approve`, {});
+  }
 
-community(slug: string) {
-  return this.get<Community>(`/communities/${slug}`);
-}
+  rejectJoinRequest(communityId: string, requestId: string) {
+    return this.post<void>(`/communities/${communityId}/requests/${requestId}/reject`, {});
+  }
 
-createCommunity(body: {
-  name: string;
-  description?: string;
-  coverImageUrl?: string;
-  iconEmoji?: string;
-  visibility?: CommunityVisibility;
-}) {
-  return this.post<Community>('/communities', body);
-}
+  /* ---------- Admin: communities ---------- */
 
-updateCommunity(id: string, body: Partial<{
-  name: string;
-  description: string;
-  coverImageUrl: string;
-  iconEmoji: string;
-  visibility: CommunityVisibility;
-}>) {
-  return this.patch<Community>(`/communities/${id}`, body);
-}
+  adminCommunities(filter: { hidden?: boolean; page?: number; size?: number }) {
+    return this.get<Page<AdminCommunity>>('/admin/communities', {
+      hidden: filter.hidden,
+      page: filter.page ?? 0,
+      size: filter.size ?? 20,
+    });
+  }
 
-deleteCommunity(id: string) {
-  return this.delete<void>(`/communities/${id}`);
-}
+  adminHideCommunity(id: string, reason: string) {
+    return this.post<AdminCommunity>(`/admin/communities/${id}/hide`, { reason });
+  }
 
-joinCommunity(id: string) {
-  return this.post<Community>(`/communities/${id}/join`, {});
-}
+  adminRestoreCommunity(id: string) {
+    return this.post<AdminCommunity>(`/admin/communities/${id}/restore`, {});
+  }
 
-leaveCommunity(id: string) {
-  return this.delete<void>(`/communities/${id}/leave`);
-}
+  /* =========================================================
+     Follows
+     ========================================================= */
 
-communityMembers(id: string) {
-  return this.get<CommunityMemberView[]>(`/communities/${id}/members`);
-}
+  followUser(userId: string) {
+    return this.post<FollowStats>(`/users/${userId}/follow`, {});
+  }
 
-removeCommunityMember(communityId: string, userId: string) {
-  return this.delete<void>(`/communities/${communityId}/members/${userId}`);
-}
+  unfollowUser(userId: string) {
+    return this.delete<FollowStats>(`/users/${userId}/follow`);
+  }
 
-communityJoinRequests(id: string) {
-  return this.get<CommunityJoinRequestView[]>(`/communities/${id}/requests`);
-}
+  followStatus(userId: string) {
+    return this.get<FollowStats>(`/users/${userId}/follow`);
+  }
 
-approveJoinRequest(communityId: string, requestId: string) {
-  return this.post<void>(`/communities/${communityId}/requests/${requestId}/approve`, {});
-}
+  /* =========================================================
+     Prayers
+     ========================================================= */
 
-rejectJoinRequest(communityId: string, requestId: string) {
-  return this.post<void>(`/communities/${communityId}/requests/${requestId}/reject`, {});
-}
-postsByCommunity(communityId: string, page = 0, size = 20) {
-  return this.get<Page<Post>>(`/posts/community/${communityId}`, { page, size });
-}
+  todaysPrayers() {
+    return this.get<DailyPrayers>('/prayers/today');
+  }
 
-
-/* ---------- Admin ---------- */
-
-adminCommunities(filter: { hidden?: boolean; page?: number; size?: number }) {
-  return this.get<Page<AdminCommunity>>('/admin/communities', {
-    hidden: filter.hidden,
-    page: filter.page ?? 0,
-    size: filter.size ?? 20,
-  });
-}
-
-adminHideCommunity(id: string, reason: string) {
-  return this.post<AdminCommunity>(`/admin/communities/${id}/hide`, { reason });
-}
-
-adminRestoreCommunity(id: string) {
-  return this.post<AdminCommunity>(`/admin/communities/${id}/restore`, {});
-}
-
-/* ---------- Follows ---------- */
-
-followUser(userId: string) {
-  return this.post<FollowStats>(`/users/${userId}/follow`, {});
-}
-
-unfollowUser(userId: string) {
-  return this.delete<FollowStats>(`/users/${userId}/follow`);
-}
-
-followStatus(userId: string) {
-  return this.get<FollowStats>(`/users/${userId}/follow`);
-}
-
-/* ---------- Prayers ---------- */
-
-todaysPrayers() {
-  return this.get<DailyPrayers>('/prayers/today');
-}
-
-  /* ---------------- Mentors (public) ---------------- */
+  /* =========================================================
+     Mentors — public discovery
+     ========================================================= */
 
   mentors() {
     return this.get<Mentor[]>('/mentors');
-  }
-
-  requestMentor(mentorId: string, message: string) {
-    return this.post<void>('/mentor-requests', { mentorId, message });
   }
 
   applyAsMentor(body: {
@@ -249,7 +251,43 @@ todaysPrayers() {
     return this.post<MentorApplication>('/mentor-applications', body);
   }
 
-  /* ---------------- Mentor dashboard ---------------- */
+  /* =========================================================
+     Mentorship — Batch 4.5 (exclusivity + inbox integration)
+     ========================================================= */
+
+  /** Send a mentorship request to a specific mentor. */
+  sendMentorRequest(mentorId: string, message?: string) {
+    return this.post<MentorshipRequest>('/mentor-requests', { mentorId, message });
+  }
+
+  /** Get the member's current mentorship state (active or pending). */
+  myMentorship() {
+    return this.get<MyMentorshipState>('/mentor-requests/mine');
+  }
+
+  /** Mentor-side: incoming pending requests. */
+  incomingMentorRequests() {
+    return this.get<MentorshipRequest[]>('/mentor-requests/incoming');
+  }
+
+  /** Mentor accepts a request. */
+  acceptMentorRequest(requestId: string, note?: string) {
+    return this.post<MentorshipRequest>(`/mentor-requests/${requestId}/accept`, { note });
+  }
+
+  /** Mentor declines a request. */
+  declineMentorRequest(requestId: string, reason: string) {
+    return this.post<MentorshipRequest>(`/mentor-requests/${requestId}/decline`, { note: reason });
+  }
+
+  /** Either party ends an active mentorship. */
+  endMentorship(requestId: string, reason?: string) {
+    return this.post<MentorshipRequest>(`/mentor-requests/${requestId}/end`, { note: reason });
+  }
+
+  /* =========================================================
+     Mentors — legacy endpoints (used by mentor dashboard pages)
+     ========================================================= */
 
   mentorMe() {
     return this.get<any>('/mentor/me');
@@ -287,7 +325,9 @@ todaysPrayers() {
     }>('/mentor/stats');
   }
 
-  /* ---------------- Messaging ---------------- */
+  /* =========================================================
+     Messaging
+     ========================================================= */
 
   conversations() {
     return this.get<ConversationView[]>('/conversations');
@@ -304,11 +344,23 @@ todaysPrayers() {
     );
   }
 
-  createConversation(participantId: string) {
-    return this.post<ConversationView>('/conversations', { participantId });
+  /** Create or fetch a conversation with a specific user. */
+  startConversationWith(userId: string) {
+    return this.post<ConversationView>('/conversations', { participantId: userId });
   }
 
-  /* ---------------- Devotions (public) ---------------- */
+  /** Deep-link helper — used by /inbox?user={id}. */
+  conversationWithUser(userId: string) {
+    return this.get<ConversationView>(`/conversations/with/${userId}`);
+  }
+  
+  markConversationRead(conversationId: string) {
+  return this.post<void>(`/conversations/${conversationId}/read`, {});
+}
+
+  /* =========================================================
+     Devotions (public)
+     ========================================================= */
 
   devotions() {
     return this.get<Devotion[]>('/devotions');
@@ -334,7 +386,7 @@ todaysPrayers() {
     }>('/trivia/today', { difficulty });
   }
 
-    triviaSubmit(
+  triviaSubmit(
     difficulty: 'EASY' | 'MEDIUM' | 'HARD',
     answers: Array<{ questionId: string; selectedIndex: number }>
   ) {
@@ -350,18 +402,20 @@ todaysPrayers() {
       }>;
     }>('/trivia/today/submit', { difficulty, answers });
   }
-  /** Kept for backwards compatibility — returns questions from the daily pool. */
+
   trivia(difficulty?: string) {
     return this.get<TriviaQuestion[]>('/trivia/questions', { difficulty });
   }
 
-  /* ---------------- Auth / Profile ---------------- */
+  /* =========================================================
+     Auth / Profile
+     ========================================================= */
 
   me() {
     return this.get<User>('/auth/me');
   }
 
-    changePassword(currentPassword: string, newPassword: string) {
+  changePassword(currentPassword: string, newPassword: string) {
     return this.post<void>('/users/me/change-password', {
       currentPassword,
       newPassword,
@@ -372,7 +426,7 @@ todaysPrayers() {
      User — personal stats
      ========================================================= */
 
-    myStats() {
+  myStats() {
     return this.get<{
       dayStreak: number;
       versesRead: number;
@@ -388,6 +442,7 @@ todaysPrayers() {
       triviaPassedTodayHard: boolean;
     }>('/users/me/stats');
   }
+
   /* =========================================================
      ADMIN — Statistics
      ========================================================= */
@@ -503,13 +558,8 @@ todaysPrayers() {
 
   reportPreview(params: {
     type:
-      | 'USERS'
-      | 'MENTORS'
-      | 'COMMUNITY'
-      | 'MODERATION'
-      | 'AUDIT'
-      | 'DEVOTIONS'
-      | 'TRIVIA';
+      | 'USERS' | 'MENTORS' | 'COMMUNITY' | 'MODERATION'
+      | 'AUDIT' | 'DEVOTIONS' | 'TRIVIA';
     from?: string;
     to?: string;
     search?: string;
@@ -528,16 +578,10 @@ todaysPrayers() {
     });
   }
 
-  /** Triggers a file download in the browser. */
   downloadReport(params: {
     type:
-      | 'USERS'
-      | 'MENTORS'
-      | 'COMMUNITY'
-      | 'MODERATION'
-      | 'AUDIT'
-      | 'DEVOTIONS'
-      | 'TRIVIA';
+      | 'USERS' | 'MENTORS' | 'COMMUNITY' | 'MODERATION'
+      | 'AUDIT' | 'DEVOTIONS' | 'TRIVIA';
     format: 'CSV' | 'XLSX' | 'PDF';
     from?: string;
     to?: string;
@@ -647,7 +691,7 @@ todaysPrayers() {
   }
 
   /* =========================================================
-     ADMIN — Trivia (question management)
+     ADMIN — Trivia
      ========================================================= */
 
   adminTrivia(filter: {
@@ -698,7 +742,7 @@ todaysPrayers() {
   }
 
   /* =========================================================
-     ADMIN — Trivia analytics (daily sessions)
+     ADMIN — Trivia analytics
      ========================================================= */
 
   adminTriviaOverview(date?: string) {

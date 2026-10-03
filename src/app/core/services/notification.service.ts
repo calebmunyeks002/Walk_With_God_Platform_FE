@@ -25,13 +25,16 @@ export class NotificationService {
   /** Unread count for the bell badge. */
   readonly unread = signal<number>(0);
 
+  /** Unread messages across all conversations (for the ✉ badge). */
+  readonly unreadMessages = signal<number>(0);
+
   /** True while the initial load is in flight. */
   readonly loading = signal<boolean>(false);
 
   private client: Client | null = null;
+  private pollHandle: any = null;
 
   constructor() {
-    // Load + connect whenever the user changes
     effect(() => {
       const user = this.auth.user();
       if (user) {
@@ -47,10 +50,13 @@ export class NotificationService {
      ========================================================= */
 
   private bootstrap(userId: string) {
-    // Initial fetch — recent + unread count
     this.refresh();
+    this.refreshUnreadMessages();
 
-    // WebSocket connection
+    // Poll unread messages every 30 seconds (fallback if WS misses an event)
+    if (this.pollHandle) clearInterval(this.pollHandle);
+    this.pollHandle = setInterval(() => this.refreshUnreadMessages(), 30_000);
+
     if (this.client?.active) return;
     this.client = new Client({
       webSocketFactory: () => new SockJS('/ws') as any,
@@ -64,6 +70,12 @@ export class NotificationService {
         `/topic/users/${userId}/notifications`,
         (frame: IMessage) => this.onLiveNotification(frame)
       );
+
+      // Also listen for messages so the ✉ badge updates instantly
+      this.client!.subscribe(
+        `/topic/users/${userId}/messages`,
+        () => this.refreshUnreadMessages()
+      );
     };
 
     this.client.activate();
@@ -72,15 +84,19 @@ export class NotificationService {
   private disconnect() {
     this.client?.deactivate();
     this.client = null;
+    if (this.pollHandle) {
+      clearInterval(this.pollHandle);
+      this.pollHandle = null;
+    }
     this.recent.set([]);
     this.unread.set(0);
+    this.unreadMessages.set(0);
   }
 
   /* =========================================================
      Public API
      ========================================================= */
 
-  /** Reload the recent list + unread count. */
   refresh() {
     this.loading.set(true);
 
@@ -100,8 +116,18 @@ export class NotificationService {
     });
   }
 
+  /** Recompute total unread messages from /api/conversations. */
+  refreshUnreadMessages() {
+    this.api.conversations().subscribe({
+      next: (list) => {
+        const total = list.reduce((sum, c) => sum + (c.unreadCount ?? 0), 0);
+        this.unreadMessages.set(total);
+      },
+      error: () => {},
+    });
+  }
+
   markRead(id: string) {
-    // Optimistic
     this.recent.update((list) =>
       list.map((n) => (n.id === id ? { ...n, read: true } : n))
     );
@@ -109,12 +135,11 @@ export class NotificationService {
 
     this.api.markNotificationRead(id).subscribe({
       next: () => {},
-      error: () => this.refresh(), // revert on failure
+      error: () => this.refresh(),
     });
   }
 
   markAllRead() {
-    // Optimistic
     this.recent.update((list) => list.map((n) => ({ ...n, read: true })));
     this.unread.set(0);
 
@@ -135,7 +160,6 @@ export class NotificationService {
         const n = payload.notification as NotificationView;
         this.recent.update((list) => [n, ...list].slice(0, 20));
         this.unread.update((c) => c + 1);
-        // Play a subtle sound (best-effort)
         this.ding();
       }
     } catch {

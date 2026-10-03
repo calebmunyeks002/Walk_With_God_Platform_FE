@@ -1,7 +1,7 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router } from '@angular/router';
 import { ApiService } from '../../../../core/services/api.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
@@ -33,6 +33,7 @@ interface MentorRequestView {
 export class MentorRequestsComponent {
   api = inject(ApiService);
   auth = inject(AuthService);
+  private router = inject(Router);
 
   requests = signal<MentorRequestView[]>([]);
   history = signal<MentorRequestView[]>([]);
@@ -68,7 +69,6 @@ export class MentorRequestsComponent {
       list = this.allRequests().filter((r) => r.status === this.statusFilter);
     }
 
-    // Text search — name, email, or message
     const q = this.searchText.trim().toLowerCase();
     if (q) {
       list = list.filter(
@@ -79,7 +79,6 @@ export class MentorRequestsComponent {
       );
     }
 
-    // Sort
     const sorted = [...list];
     if (this.sortBy === 'NEWEST') {
       sorted.sort(
@@ -97,7 +96,6 @@ export class MentorRequestsComponent {
     return sorted;
   });
 
-  /** Counts for the summary pills. */
   counts = computed(() => {
     const all = this.allRequests();
     return {
@@ -116,12 +114,10 @@ export class MentorRequestsComponent {
     this.loading.set(true);
     this.error.set('');
 
-    // Pending queue
     this.api.mentorRequests().subscribe({
       next: (list) => {
         this.requests.set(list);
         this.loading.set(false);
-        // Also pull history in the background
         this.loadHistory();
       },
       error: (e) => {
@@ -203,6 +199,15 @@ export class MentorRequestsComponent {
         this.actionBusy.set(null);
         this.actionMessage.set(e?.error?.message || 'Failed to decline.');
       },
+    });
+  }
+
+  /* ---------- Chat with mentee (NEW) ---------- */
+
+  openChat(memberUserId: string) {
+    if (!memberUserId) return;
+    this.router.navigate(['/inbox'], {
+      queryParams: { user: memberUserId },
     });
   }
 

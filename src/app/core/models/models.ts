@@ -94,6 +94,8 @@ export interface Mentor {
   yearsExperience: number;
   verified: boolean;
   rating?: number | null;
+  isMyMentor?: boolean;
+  mentorshipStatus?: MentorshipStatus | null;
 }
 
 export type MentorRequestStatus =
@@ -400,4 +402,42 @@ export interface AdminCommunity {
   hiddenReason?: string | null;
   creatorId: string;
   createdAt: string;
+}
+
+/* ---------- Mentor exclusivity (Batch 4.5) ---------- */
+
+export type MentorshipStatus = 'PENDING' | 'ACCEPTED' | 'DECLINED' | 'COMPLETED';
+
+export interface MentorshipMemberView {
+  id: string;
+  name: string;
+  email: string;
+  avatarUrl?: string | null;
+}
+
+export interface MentorshipMentorView {
+  id: string;         // Mentor entity id (not user id)
+  userId: string;     // Mentor's user id
+  name: string;
+  email: string;
+  avatarUrl?: string | null;
+}
+
+export interface MentorshipRequest {
+  id: string;
+  status: MentorshipStatus;
+  message?: string | null;
+  member: MentorshipMemberView;
+  mentor: MentorshipMentorView;
+  createdAt: string;
+  acceptedAt?: string | null;
+  declinedAt?: string | null;
+  endedAt?: string | null;
+  endReason?: string | null;
+}
+
+export interface MyMentorshipState {
+  activeMentorship: MentorshipRequest | null;
+  pendingRequest: MentorshipRequest | null;
+  canRequestNew: boolean;
 }

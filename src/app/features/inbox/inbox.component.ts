@@ -1,6 +1,7 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import {
   ApiService,
   ConversationView,
@@ -8,6 +9,7 @@ import {
 } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
 import { WebSocketService, LiveMessage } from '../../core/services/websocket.service';
+import { NotificationService } from '../../core/services/notification.service';
 import { CallService } from '../../core/services/call.service';
 
 @Component({
@@ -21,7 +23,9 @@ export class InboxComponent {
   api = inject(ApiService);
   auth = inject(AuthService);
   ws = inject(WebSocketService);
+  notif = inject(NotificationService);
   call = inject(CallService);
+  private route = inject(ActivatedRoute);
 
   conversations = signal<ConversationView[]>([]);
   activeId = signal<string | null>(null);
@@ -34,12 +38,12 @@ export class InboxComponent {
   sending = signal(false);
   searchText = '';
 
-  /** Active conversation object. */
+  private deepLinkHandled = false;
+
   activeConversation = computed(
     () => this.conversations().find((c) => c.id === this.activeId()) ?? null
   );
 
-  /** Filtered conversation list (null-safe). */
   filteredConversations = computed(() => {
     const q = this.searchText.trim().toLowerCase();
     if (!q) return this.conversations();
@@ -50,7 +54,6 @@ export class InboxComponent {
     });
   });
 
-  /** True if the current user can start a call (not already in one). */
   get canCall(): boolean {
     return !this.call.activeCall();
   }
@@ -58,28 +61,55 @@ export class InboxComponent {
   constructor() {
     this.loadConversations();
 
-    // React to live messages from WebSocket
+    this.route.queryParamMap.subscribe((params) => {
+      const userId = params.get('user');
+      if (userId && !this.deepLinkHandled) {
+        this.deepLinkHandled = true;
+        this.openWithUser(userId);
+      }
+    });
+
     effect(() => {
       const live = this.ws.lastMessage();
       if (!live) return;
 
+      // Append to open conversation (if it belongs there)
       if (live.conversationId === this.activeId()) {
         if (!this.messages().some((m) => m.id === live.id)) {
           this.messages.update((list) => [...list, toMessageView(live)]);
         }
+        // We're viewing it → treat as read
+        this.api.markConversationRead(live.conversationId).subscribe({
+          next: () => this.notif.refreshUnreadMessages(),
+        });
       }
+
+      // Always refresh the conversation list — sorts newest to top
       this.loadConversations();
+      // Refresh the topbar ✉ badge
+      this.notif.refreshUnreadMessages();
     });
   }
+
+  /* =========================================================
+     Conversation loading
+     ========================================================= */
 
   loadConversations() {
     this.loadingConvos.set(true);
     this.api.conversations().subscribe({
       next: (list) => {
-        this.conversations.set(list);
+        // Newest activity first
+        const sorted = [...list].sort(
+          (a, b) =>
+            new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        );
+        this.conversations.set(sorted);
         this.loadingConvos.set(false);
-        if (!this.activeId() && list.length > 0) {
-          this.selectConversation(list[0]);
+
+        // Auto-select the top one if nothing is selected
+        if (!this.activeId() && sorted.length > 0) {
+          this.selectConversation(sorted[0]);
         }
       },
       error: (e) => {
@@ -89,21 +119,63 @@ export class InboxComponent {
     });
   }
 
+  private openWithUser(userId: string) {
+    const existing = this.conversations().find((c) =>
+      c.participantIds?.includes(userId)
+    );
+    if (existing) {
+      this.selectConversation(existing);
+      return;
+    }
+
+    this.api.conversationWithUser(userId).subscribe({
+      next: (c) => {
+        this.api.conversations().subscribe({
+          next: (list) => {
+            const sorted = [...list].sort(
+              (a, b) =>
+                new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+            );
+            this.conversations.set(sorted);
+            const target = sorted.find((x) => x.id === c.id);
+            if (target) this.selectConversation(target);
+          },
+        });
+      },
+      error: (e) => {
+        this.error.set(e?.error?.message || 'Could not open conversation.');
+      },
+    });
+  }
+
   selectConversation(c: ConversationView) {
     this.activeId.set(c.id);
     this.loadingMessages.set(true);
     this.messages.set([]);
 
+    // Optimistically clear the unread badge on the list + topbar
+    if (c.unreadCount > 0) {
+      this.conversations.update((list) =>
+        list.map((x) => (x.id === c.id ? { ...x, unreadCount: 0 } : x))
+      );
+    }
+
     this.api.messages(c.id).subscribe({
       next: (msgs) => {
         this.messages.set(msgs);
         this.loadingMessages.set(false);
+        // Backend marks as read on GET; refresh topbar count
+        this.notif.refreshUnreadMessages();
       },
       error: () => {
         this.loadingMessages.set(false);
       },
     });
   }
+
+  /* =========================================================
+     Sending
+     ========================================================= */
 
   send() {
     const content = this.draft.trim();
@@ -131,6 +203,8 @@ export class InboxComponent {
         this.messages.update((list) =>
           list.map((m) => (m.id === optimistic.id ? real : m))
         );
+        // Bump this conversation to the top of the list
+        this.loadConversations();
       },
       error: (e) => {
         this.sending.set(false);
@@ -154,7 +228,6 @@ export class InboxComponent {
     return m.senderId === this.auth.user()?.id;
   }
 
-  /** Start a WebRTC call with the other participant of the open conversation. */
   startCall(mediaType: 'AUDIO' | 'VIDEO') {
     const conv = this.activeConversation();
     if (!conv || !this.canCall) return;
@@ -183,7 +256,6 @@ export class InboxComponent {
   }
 }
 
-/** Convert a WebSocket payload into a MessageView. */
 function toMessageView(m: LiveMessage): MessageView {
   return {
     id: m.id,

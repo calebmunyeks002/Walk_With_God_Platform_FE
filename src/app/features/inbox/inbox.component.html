@@ -31,12 +31,16 @@
         </div>
         } @else {
         @for (c of filteredConversations(); track c.id) {
-        <button class="conv-item" [class.active]="activeId() === c.id" (click)="selectConversation(c)">
+        <button class="conv-item" [class.active]="activeId() === c.id" [class.unread]="c.unreadCount > 0"
+            (click)="selectConversation(c)">
             <div class="avatar">{{ otherParticipantInitial(c) }}</div>
             <div class="conv-info">
                 <strong>{{ otherParticipantName(c) }}</strong>
                 <small>{{ c.lastMessage || 'Start a conversation' }}</small>
             </div>
+            @if (c.unreadCount > 0) {
+            <span class="unread-badge">{{ c.unreadCount > 99 ? '99+' : c.unreadCount }}</span>
+            }
         </button>
         }
         }
@@ -56,7 +60,6 @@
                 <small>Private conversation</small>
             </div>
 
-            <!-- Call action buttons -->
             <div class="chat-head-actions">
                 <button class="icon-action" type="button" [disabled]="!canCall" (click)="startCall('AUDIO')"
                     title="Voice call">

@@ -114,7 +114,12 @@
                 </div>
 
                 <!-- Messages -->
-                <button class="icon-btn" title="Messages" routerLink="/inbox">✉</button>
+                <button class="icon-btn notif-btn" title="Messages" routerLink="/inbox">
+                    ✉
+                    @if (notif.unreadMessages() > 0) {
+                    <span class="notif-badge">{{ notif.unreadMessages() > 99 ? '99+' : notif.unreadMessages() }}</span>
+                    }
+                </button>
 
                 <!-- User chip with dropdown -->
                 <div class="user-menu">

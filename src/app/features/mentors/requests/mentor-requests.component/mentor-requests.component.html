@@ -61,7 +61,7 @@
 <div class="request-list">
     @for (r of visibleRequests(); track r.id) {
     <article class="request-card">
-
+    
         <div class="card-head">
             <div class="avatar">{{ r.member.name.charAt(0) }}</div>
             <div class="head-info">
@@ -73,21 +73,21 @@
             </span>
             <span class="time">{{ timeAgo(r.createdAt) }}</span>
         </div>
-
+    
         @if (r.message) {
         <div class="card-body">
             <span class="label">Message</span>
             <p class="message">{{ r.message }}</p>
         </div>
         }
-
+    
         @if (r.responseNote) {
         <div class="response-note">
             <span class="label">Your response</span>
             <p>{{ r.responseNote }}</p>
         </div>
         }
-
+    
         @if (r.status === 'PENDING') {
         <div class="card-actions">
             <button class="btn ghost danger" [disabled]="actionBusy() === r.id" (click)="openDeclineDialog(r)">
@@ -98,7 +98,15 @@
             </button>
         </div>
         }
-
+    
+        @if (r.status === 'ACCEPTED') {
+        <div class="card-actions">
+            <button class="btn primary" (click)="openChat(r.member.id)">
+                💬 Open chat
+            </button>
+        </div>
+        }
+    
     </article>
     }
 </div>

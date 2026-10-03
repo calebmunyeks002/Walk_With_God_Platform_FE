@@ -4,131 +4,174 @@
         <h1>Walk with someone who can guide you</h1>
         <p>Our mentors are Christian leaders who complete a verification and accreditation review.</p>
     </div>
-    <a routerLink="/apply-mentor" class="head-btn" *ngIf="!isMentor()">
-        Apply to become a mentor
-    </a>
+    <button class="btn primary">Apply to become a mentor</button>
 </section>
 
-@if (actionMessage()) {
-<div class="toast">{{ actionMessage() }}</div>
-}
-
-<!-- Filters -->
-<div class="filters">
-    <input type="text" placeholder="Search by name, church, or specialty…" [(ngModel)]="searchText" />
-
-    <select [(ngModel)]="specialtyFilter">
-        @for (s of allSpecialties(); track s) {
-        <option [value]="s">{{ s === 'ALL' ? 'All specialties' : s }}</option>
-        }
-    </select>
-
-    <select [(ngModel)]="experienceFilter">
-        <option value="ALL">Any experience</option>
-        <option value="0-5">0–5 years</option>
-        <option value="5-10">5–10 years</option>
-        <option value="10+">10+ years</option>
-    </select>
-
-    <select [(ngModel)]="sortBy">
-        <option value="NAME">Name A-Z</option>
-        <option value="EXPERIENCE">Most experience</option>
-        <option value="RATING">Highest rated</option>
-    </select>
-
-    <span class="result-count">{{ visibleMentors().length }} mentor{{ visibleMentors().length === 1 ? '' : 's' }}</span>
-</div>
-
 @if (loading()) {
-<div class="card">Loading mentors…</div>
-} @else if (error()) {
-<div class="card error">{{ error() }}</div>
-} @else if (visibleMentors().length === 0) {
-<div class="card empty-state">
-    <h3>No mentors match these filters</h3>
-    <p>Try clearing the search or choosing a different specialty.</p>
+<div class="state">
+    <div class="spinner"></div>
+    <p>Loading…</p>
 </div>
 } @else {
 
-<div class="mentor-grid">
-    @for (m of visibleMentors(); track m.id) {
-    <article class="mentor-card" [class.own-profile]="isOwnProfile(m)">
+<!-- ============ ACTIVE MENTOR ============ -->
+@if (state().activeMentorship; as active) {
+<div class="active-mentor-card">
+    <div class="ribbon">Your Mentor</div>
 
-        @if (isOwnProfile(m)) {
-        <div class="own-ribbon">★ This is you</div>
+    <div class="avatar-lg">
+        @if (active.mentor.avatarUrl) {
+        <img [src]="active.mentor.avatarUrl" [alt]="active.mentor.name" />
+        } @else {
+        <span>{{ active.mentor.name.charAt(0).toUpperCase() }}</span>
         }
+    </div>
 
-        <div class="card-head">
-            <div class="avatar">{{ m.user.name.charAt(0) }}</div>
-            <div class="head-info">
-                <strong>{{ m.user.name }}</strong>
-                @if (m.verified) {
-                <span class="verified" title="Verified mentor">✓ Verified</span>
-                }
-                <small>
-                    {{ m.church || 'Christian leader' }}
-                    @if (m.yearsExperience) {
-                    · {{ m.yearsExperience }} yrs experience
-                    }
-                </small>
+    <div class="info">
+        <h2>{{ active.mentor.name }}</h2>
+        <p class="email">{{ active.mentor.email }}</p>
+        <p class="since">Walking together since {{ active.acceptedAt | date:'mediumDate' }}</p>
+    </div>
+
+    <div class="actions">
+        <button class="btn primary" (click)="openChatWithMentor()">
+            💬 Open chat
+        </button>
+        <button class="btn ghost" (click)="endMentorship()">
+            End mentorship
+        </button>
+    </div>
+</div>
+}
+
+<!-- ============ PENDING REQUEST BANNER ============ -->
+@else if (state().pendingRequest; as pending) {
+<div class="pending-banner">
+    <div class="icon">⏳</div>
+    <div>
+        <strong>Request pending</strong>
+        <p>Waiting for {{ pending.mentor.name }} to respond. You cannot send another request until this one is resolved.
+        </p>
+    </div>
+</div>
+}
+
+<!-- ============ DISCOVERY GRID ============ -->
+@if (!state().activeMentorship) {
+<div class="filters">
+    <input type="text" [(ngModel)]="search" placeholder="Search by name, church, or specialty…" />
+    <select [(ngModel)]="specialty">
+        <option value="all">All specialties</option>
+        <option value="Prayer">Prayer</option>
+        <option value="Bible study">Bible study</option>
+        <option value="Discipleship">Discipleship</option>
+    </select>
+    <select [(ngModel)]="experience">
+        <option value="any">Any experience</option>
+        <option value="5">5+ years</option>
+        <option value="10">10+ years</option>
+    </select>
+    <select [(ngModel)]="sort">
+        <option value="name">Name A-Z</option>
+        <option value="rating">Top rated</option>
+    </select>
+    <span class="count">{{ filtered().length }} mentors</span>
+</div>
+
+<div class="mentor-grid">
+    @for (m of filtered(); track m.id) {
+    <article class="mentor-card" [class.disabled]="state().pendingRequest && !requestPendingFor(m)">
+        <header>
+            <div class="avatar">
+                @if (m.user.avatarUrl) { <img [src]="m.user.avatarUrl" [alt]="m.user.name" /> }
+                @else { <span>{{ m.user.name.charAt(0).toUpperCase() }}</span> }
             </div>
-        </div>
+            <div class="head-text">
+                <div class="name-row">
+                    <strong>{{ m.user.name }}</strong>
+                    @if (m.verified) {
+                    <span class="verified">✓ Verified</span>
+                    }
+                </div>
+                <span class="meta">
+                    {{ m.church || 'Christian leader' }} · {{ m.yearsExperience }} yrs experience
+                </span>
+            </div>
+        </header>
 
         @if (m.bio) {
         <p class="bio">{{ m.bio }}</p>
         }
 
-        @if (m.specialties?.length) {
-        <div class="specialties">
-            @for (s of m.specialties; track s) {
-            <span class="specialty-chip">{{ s }}</span>
+        @if (m.specialties.length) {
+        <div class="tags">
+            @for (t of m.specialties; track t) {
+            <span class="tag">{{ t }}</span>
             }
         </div>
         }
 
-        <div class="card-footer">
-            <div class="rating">
-                @if (m.rating) {
-                <span class="stars">★ {{ m.rating }}</span>
-                } @else {
-                <span class="no-rating">No rating yet</span>
-                }
-            </div>
-
-            @if (isOwnProfile(m)) {
-            <span class="self-note">This is your mentor profile</span>
+        <footer>
+            @if (m.rating) {
+            <span class="rating">★ {{ m.rating }}</span>
             } @else {
-            <button class="btn primary" (click)="openRequestDialog(m)">
+            <span class="rating muted">No rating yet</span>
+            }
+
+            @if (state().activeMentorship) {
+            <!-- Won't reach here — active mentor view replaces the grid -->
+            } @else if (requestPendingFor(m)) {
+            <button class="btn ghost" disabled>⏳ Request pending</button>
+            } @else if (state().pendingRequest) {
+            <button class="btn ghost" disabled title="Resolve your pending request first">
+                Unavailable
+            </button>
+            } @else {
+            <button class="btn primary" (click)="openRequest(m)">
                 Request mentorship →
             </button>
             }
-        </div>
-
+        </footer>
     </article>
     }
 </div>
-
+}
 }
 
-<!-- Request dialog -->
-@if (requestDialogFor(); as mentor) {
-<div class="dialog-backdrop" (click)="cancelRequest()"></div>
-<div class="dialog">
-    <h3>Request mentorship from {{ mentor.user.name }}?</h3>
-    <p class="dialog-sub">
-        Add a short note about what you're seeking. They'll respond in your inbox.
-    </p>
+<!-- ============ REQUEST MODAL ============ -->
+@if (requestOpen() && requestTarget(); as target) {
+<div class="overlay" (click)="closeRequest()"></div>
+<div class="modal">
+    <header>
+        <h3>Request mentorship</h3>
+        <button class="x" (click)="closeRequest()">✕</button>
+    </header>
 
-    <label>
-        Your message
-        <textarea rows="4" [(ngModel)]="requestNote" placeholder="e.g., I'd like guidance on prayer and daily devotion…"
-            maxlength="2000"></textarea>
+    <div class="target">
+        <div class="avatar sm">
+            @if (target.user.avatarUrl) { <img [src]="target.user.avatarUrl" [alt]="target.user.name" /> }
+            @else { <span>{{ target.user.name.charAt(0).toUpperCase() }}</span> }
+        </div>
+        <div>
+            <strong>{{ target.user.name }}</strong>
+            <small>{{ target.church || 'Christian mentor' }}</small>
+        </div>
+    </div>
+
+    <label class="field">
+        <span>Message (optional)</span>
+        <textarea [(ngModel)]="requestMessage" rows="4" maxlength="1000"
+            placeholder="Tell them a bit about yourself and why you'd like them as a mentor…"></textarea>
     </label>
 
-    <div class="dialog-actions">
-        <button class="btn ghost" (click)="cancelRequest()">Cancel</button>
-        <button class="btn primary" [disabled]="sending()" (click)="confirmRequest()">
-            {{ sending() ? 'Sending…' : 'Send Request' }}
+    @if (errorMsg()) {
+    <div class="error">{{ errorMsg() }}</div>
+    }
+
+    <div class="modal-actions">
+        <button class="btn ghost" (click)="closeRequest()">Cancel</button>
+        <button class="btn primary" [disabled]="sending()" (click)="submitRequest()">
+            {{ sending() ? 'Sending…' : 'Send request' }}
         </button>
     </div>
 </div>
