@@ -5,11 +5,11 @@
        ============================================================ -->
     <aside class="sidebar">
         <div class="brand">
-            <span class="brand-mark">✝</span>
+            <span class="brand-mark">âœ</span>
             @if (sidebarOpen()) {
             <div class="brand-text">
                 <strong>Walk<span>With</span>God</strong>
-                <small>FAITH • PURPOSE • GROWTH</small>
+                <small>FAITH â€¢ PURPOSE â€¢ GROWTH</small>
             </div>
             }
         </div>
@@ -41,7 +41,7 @@
 
         <div class="sidebar-footer">
             <button class="collapse-btn" (click)="toggleSidebar()" [title]="sidebarOpen() ? 'Collapse' : 'Expand'">
-                {{ sidebarOpen() ? '«' : '»' }}
+                {{ sidebarOpen() ? 'Â«' : 'Â»' }}
             </button>
         </div>
     </aside>
@@ -53,9 +53,10 @@
 
         <!-- Topbar -->
         <header class="topbar">
+      <button class="mobile-menu-btn" (click)="toggleSidebar()">☰</button>
             <div class="search-box">
-                <span class="search-icon">⌕</span>
-                <input type="text" placeholder="Search scripture, people, devotion…" aria-label="Search" />
+                <span class="search-icon">âŒ•</span>
+                <input type="text" placeholder="Search scripture, people, devotionâ€¦" aria-label="Search" />
             </div>
 
             <div class="topbar-actions">
@@ -64,7 +65,7 @@
                 <div class="notif-menu">
                     <button class="icon-btn notif-btn" (click)="toggleNotif()" [attr.aria-expanded]="notifOpen()"
                         title="Notifications">
-                        🔔
+                        ðŸ””
                         @if (notif.unread() > 0) {
                         <span class="notif-badge">{{ notif.unread() > 99 ? '99+' : notif.unread() }}</span>
                         }
@@ -84,10 +85,10 @@
 
                         <div class="notif-list">
                             @if (notif.loading()) {
-                            <div class="notif-state">Loading…</div>
+                            <div class="notif-state">Loadingâ€¦</div>
                             } @else if (notif.recent().length === 0) {
                             <div class="notif-state">
-                                <div class="empty-icon">🔔</div>
+                                <div class="empty-icon">ðŸ””</div>
                                 <p>You're all caught up</p>
                                 <small>New notifications will appear here</small>
                             </div>
@@ -115,7 +116,7 @@
 
                 <!-- Messages -->
                 <button class="icon-btn notif-btn" title="Messages" routerLink="/inbox">
-                    ✉
+                    âœ‰
                     @if (notif.unreadMessages() > 0) {
                     <span class="notif-badge">{{ notif.unreadMessages() > 99 ? '99+' : notif.unreadMessages() }}</span>
                     }
@@ -143,19 +144,19 @@
                         <div class="dropdown-divider"></div>
 
                         <a class="dropdown-item" routerLink="/profile" (click)="closeUserMenu()">
-                            <span>☺</span> My Profile
+                            <span>â˜º</span> My Profile
                         </a>
                         <a class="dropdown-item" routerLink="/inbox" (click)="closeUserMenu()">
-                            <span>✉</span> Inbox
+                            <span>âœ‰</span> Inbox
                         </a>
                         <a class="dropdown-item" routerLink="/prayer" (click)="closeUserMenu()">
-                            <span>🙏</span> Today's Prayer
+                            <span>ðŸ™</span> Today's Prayer
                         </a>
 
                         <div class="dropdown-divider"></div>
 
                         <button class="dropdown-item danger" (click)="signOut()">
-                            <span>⏻</span> Sign out
+                            <span>â»</span> Sign out
                         </button>
                     </div>
                     }
