@@ -16,7 +16,7 @@ export class SignupComponent {
 
   name = '';
   email = '';
-  password = '';
+  password = ''`n  showPassword = false`n  showConfirmPassword = false;
   confirm = '';
   agree = false;
 

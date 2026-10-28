@@ -5,9 +5,9 @@
 
         <div class="visual-content">
             <div class="brand-top">
-                <span>✝</span>
+                <span>âœ</span>
                 <strong>Walk<span>With</span>God</strong>
-                <small>FAITH • PURPOSE • GROWTH • A BETTER YOU</small>
+                <small>FAITH â€¢ PURPOSE â€¢ GROWTH â€¢ A BETTER YOU</small>
             </div>
 
             <div class="hero-copy">
@@ -17,8 +17,8 @@
                     and walk with God together.
                 </p>
                 <blockquote>
-                    “As iron sharpens iron, so one person sharpens another.”
-                    <small>— Proverbs 27:17</small>
+                    â€œAs iron sharpens iron, so one person sharpens another.â€
+                    <small>â€” Proverbs 27:17</small>
                 </blockquote>
             </div>
         </div>
@@ -32,23 +32,23 @@
 
             <form (ngSubmit)="submit()">
                 <label>
-                    ◯
+                    â—¯
                     <input name="name" [(ngModel)]="name" required placeholder="Full name" />
                 </label>
 
                 <label>
-                    ✉
+                    âœ‰
                     <input name="email" [(ngModel)]="email" type="email" required placeholder="Email address" />
                 </label>
 
                 <label>
-                    ♙
+                    â™™
                     <input name="password" [(ngModel)]="password" type="password" required minlength="8"
                         placeholder="Password (8+ characters)" />
                 </label>
 
                 <label>
-                    ♙
+                    â™™
                     <input name="confirm" [(ngModel)]="confirm" type="password" required
                         placeholder="Confirm password" />
                 </label>
@@ -61,7 +61,7 @@
                 <div class="error" *ngIf="error()">{{ error() }}</div>
 
                 <button class="primary" [disabled]="busy()">
-                    {{ busy() ? 'Creating...' : 'Create Account →' }}
+                    {{ busy() ? 'Creating...' : 'Create Account â†’' }}
                 </button>
             </form>
 
