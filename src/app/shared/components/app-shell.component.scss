@@ -60,19 +60,20 @@
   overflow: hidden;
 }
 
-/* ---------- TOPBAR ALIGNMENT FIX ---------- */
+/* ---------- TOPBAR ---------- */
 .topbar {
   display: flex;
   align-items: center;
-  justify-content: space-between; /* Pushes left content and right content to opposite ends */
+  justify-content: space-between;
   padding: 12px 24px;
   background: #fff;
   border-bottom: 1px solid #eee6f4;
   flex-shrink: 0;
   gap: 20px;
+  position: relative;
+  z-index: 50;
 }
 
-/* Wrapper for the left side of the topbar (toggle + search) */
 .topbar-left {
   display: flex;
   align-items: center;
@@ -80,12 +81,13 @@
   gap: 16px;
 }
 
-/* Wrapper for the right side of the topbar (notif + msg + user) */
 .topbar-actions {
   display: flex;
   align-items: center;
-  gap: 16px; /* Spacing between icons */
+  gap: 16px;
   flex-shrink: 0;
+  position: relative;
+  z-index: 100;
 }
 
 .search-box {
@@ -97,7 +99,7 @@
   height: 40px;
   padding: 0 12px;
   width: 100%;
-  max-width: 400px; /* Prevents search from growing too wide */
+  max-width: 400px;
 }
 
 .search-box input {
@@ -110,16 +112,13 @@
   color: #2a1740;
 }
 
-.search-icon {
-  color: #8c8295;
-}
+.search-icon { color: #8c8295; }
 
-/* Hide search bar on smaller screens */
 @media (max-width: 768px) {
   .search-box { display: none; }
 }
 
-/* ---------- SIDEBAR INNER STRUCTURE ---------- */
+/* ---------- SIDEBAR INNER ---------- */
 .brand {
   display: flex;
   align-items: center;
@@ -214,3 +213,82 @@
 @media (max-width: 768px) {
   .content { padding: 16px; }
 }
+
+/* =========================================================
+   DROPDOWN OVERLAYS (The fix you need)
+   ========================================================= */
+.user-menu, .notif-menu {
+  position: relative;
+}
+
+.user-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: transparent;
+}
+
+.user-dropdown, .notif-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  z-index: 100;
+  background: #fff;
+  border: 1px solid #eee6f4;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(54, 22, 78, 0.15);
+  min-width: 240px;
+  overflow: hidden;
+  animation: fadeInDown 0.15s ease-out;
+}
+
+.notif-dropdown { width: 320px; }
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* User menu inner */
+.dropdown-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px;
+  background: #faf8fc;
+}
+
+.avatar.lg { width: 48px; height: 48px; font-size: 18px; }
+
+.dropdown-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dropdown-info strong { font-size: 14px; color: #2a1740; }
+.role-tag { font-size: 10px; font-weight: 800; color: #8b42c9; text-transform: uppercase; }
+.dropdown-info .email { font-size: 11px; color: #8c8295; word-break: break-all; }
+
+.dropdown-divider { height: 1px; background: #eee6f4; margin: 4px 0; }
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #6b5c7a;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s;
+}
+
+.dropdown-item:hover { background: #f3eafb; color: #6d22a4; }
+.dropdown-item.danger { color: #9f2440; }
+.dropdown-item.danger:hover { background: #fdecec; }
