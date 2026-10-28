@@ -27,6 +27,7 @@ export class AppShellComponent {
   call = inject(CallService);
   notif = inject(NotificationService);
 
+  // Default to open on all screens
   sidebarOpen = signal(true);
   userMenuOpen = signal(false);
   notifOpen = signal(false);

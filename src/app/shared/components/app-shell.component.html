@@ -32,6 +32,7 @@
       </div>
     }
 
+    <!-- Desktop toggle button at the bottom of the sidebar -->
     <div class="sidebar-footer">
       <button class="collapse-btn" (click)="toggleSidebar()" [title]="sidebarOpen() ? 'Collapse' : 'Expand'">
         {{ sidebarOpen() ? '«' : '»' }}
@@ -42,6 +43,12 @@
   <main class="main">
     <header class="topbar">
       <button class="mobile-menu-btn" (click)="toggleSidebar()">☰</button>
+      
+      <!-- Desktop toggle button inline with topbar -->
+      <button class="desktop-toggle-btn" (click)="toggleSidebar()" title="Toggle Sidebar">
+        ☰
+      </button>
+
       <div class="search-box">
         <span class="search-icon">⌕</span>
         <input type="text" placeholder="Search scripture, people, devotion…" aria-label="Search" />

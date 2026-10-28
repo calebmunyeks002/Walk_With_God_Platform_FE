@@ -1,8 +1,8 @@
 .shell {
   display: flex;
-  min-height: 100vh;
+  height: 100vh; /* Force shell to fill viewport height */
   background: #f4effa;
-  position: relative;
+  overflow: hidden;
 }
 
 .sidebar {
@@ -13,8 +13,10 @@
   flex-direction: column;
   transition: transform 0.3s ease, width 0.3s ease;
   z-index: 1000;
+  height: 100%;
 }
 
+/* Hide sidebar completely on mobile when collapsed */
 .shell.collapsed .sidebar {
   width: 72px;
 }
@@ -48,12 +50,14 @@
   .sidebar-backdrop { display: none; }
 }
 
+/* ---------- MAIN CONTENT ---------- */
 .main {
   flex: 1;
   display: flex;
   flex-direction: column;
   min-width: 0;
-  width: 100%;
+  height: 100%;
+  overflow: hidden;
 }
 
 .topbar {
@@ -62,25 +66,108 @@
   padding: 12px 24px;
   background: #fff;
   border-bottom: 1px solid #eee6f4;
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  flex-shrink: 0; /* Prevents topbar from shrinking */
+}
+
+/* Hide search bar on very small screens */
+.search-box {
+  flex: 1;
+  max-width: 400px;
+  margin: 0 16px;
+}
+
+@media (max-width: 768px) {
+  .search-box { display: none; }
 }
 
 .content {
   padding: 24px;
   flex: 1;
-  overflow-x: hidden;
+  overflow-y: auto; /* Only the content scrolls */
 }
 
 @media (max-width: 768px) {
   .content { padding: 16px; }
 }
 
-@media (max-width: 600px) {
-  .search-box { display: none; }
+/* ---------- SIDEBAR INNER STRUCTURE ---------- */
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
 }
 
+/* THIS IS THE FIX FOR THE NAVIGATION SCROLLING */
+.nav {
+  flex: 1;
+  padding: 16px 12px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Custom scrollbar for the nav */
+.nav::-webkit-scrollbar { width: 6px; }
+.nav::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
+.nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+
+.nav-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 16px; border-radius: 10px;
+  color: #d8c5f0; text-decoration: none;
+  font-weight: 600; font-size: 13px; margin-bottom: 4px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
+.nav-item.active { background: #8a31cf; color: #fff; }
+
+.sidebar-quote {
+  padding: 16px 24px;
+  font-size: 12px;
+  color: #9b87b0;
+  font-style: italic;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+.collapse-btn {
+  background: rgba(255,255,255,0.1); border: 0; color: #fff;
+  padding: 8px; border-radius: 8px; cursor: pointer;
+  width: 100%; font-size: 18px;
+}
+
+.sidebar-footer {
+  padding: 16px;
+  border-top: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+
+@media (max-width: 991px) {
+  .collapse-btn, .sidebar-footer { display: none; }
+}
+
+/* Hide desktop toggle on mobile */
+.desktop-toggle-btn {
+  display: none;
+  background: transparent;
+  border: 0;
+  font-size: 20px;
+  color: #6d22a4;
+  cursor: pointer;
+  margin-right: 16px;
+}
+
+@media (min-width: 992px) {
+  .desktop-toggle-btn { display: block; }
+}
+
+/* Mobile hamburger menu (only shows on mobile) */
 .mobile-menu-btn {
   display: none;
   background: transparent;
@@ -93,35 +180,4 @@
 
 @media (max-width: 991px) {
   .mobile-menu-btn { display: block; }
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 24px;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-}
-
-.nav { flex: 1; padding: 16px 12px; overflow-y: auto; }
-
-.nav-item {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 16px; border-radius: 10px;
-  color: #d8c5f0; text-decoration: none;
-  font-weight: 600; font-size: 13px; margin-bottom: 4px;
-  transition: all 0.2s;
-}
-
-.nav-item:hover { background: rgba(255,255,255,0.06); color: #fff; }
-.nav-item.active { background: #8a31cf; color: #fff; }
-
-.collapse-btn {
-  background: rgba(255,255,255,0.1); border: 0; color: #fff;
-  padding: 8px; border-radius: 8px; cursor: pointer;
-  width: 100%; margin-top: auto; font-size: 18px;
-}
-
-@media (max-width: 991px) {
-  .collapse-btn { display: none; }
 }
