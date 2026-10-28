@@ -1,8 +1,9 @@
 .login-page {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
-  height: 100vh;
-  overflow: hidden;
+  height: 100vh; /* Force exactly the viewport height */
+  width: 100vw;
+  overflow: hidden; /* Hide scrollbars */
   background: #faf6ff;
 }
 
@@ -110,8 +111,9 @@
   align-items: center;
   justify-content: center;
   padding: 40px 24px;
-  overflow-y: auto;
   height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .form-card {
@@ -312,8 +314,9 @@
   .login-page {
   display: grid;
   grid-template-columns: 1.2fr 1fr;
-  height: 100vh;
-  overflow: hidden;
+  height: 100vh; /* Force exactly the viewport height */
+  width: 100vw;
+  overflow: hidden; /* Hide scrollbars */
   background: #faf6ff;
 }
 
@@ -337,8 +340,9 @@
   align-items: center;
   justify-content: center;
   padding: 40px 24px;
-  overflow-y: auto;
   height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
   .form-card { padding: 28px 22px; }
   .form-title { font-size: 26px; }
@@ -351,13 +355,13 @@
 
 @media (max-width: 900px) {
   .login-page {
-    display: flex;
-    flex-direction: column;
-    height: auto;
-    min-height: 100vh;
-    overflow-y: auto;
-    background: #f4effa;
-  }
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  height: 100vh; /* Force exactly the viewport height */
+  width: 100vw;
+  overflow: hidden; /* Hide scrollbars */
+  background: #faf6ff;
+}
 
   /* Hide the big hero panel on mobile or make it very small */
   .hero-panel {
@@ -365,13 +369,14 @@
   }
 
   .form-panel {
-    padding: 24px 16px;
-    width: 100%;
-    height: auto;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
 
   .form-card {
     padding: 32px 24px;
