@@ -19,10 +19,9 @@ export class SignupComponent {
   email = '';
   password = '';
   confirmPassword = '';
-  
+  agreeTerms = false;
   showPassword = false;
   showConfirmPassword = false;
-  agreeTerms = false;
   loading = false;
   error = '';
 
@@ -47,7 +46,11 @@ export class SignupComponent {
     this.loading = true;
     this.error = '';
 
-    this.auth.register(this.name, this.email, this.password).subscribe({
+    this.auth.register({
+      name: this.name,
+      email: this.email,
+      password: this.password,
+    }).subscribe({
       next: () => {
         this.loading = false;
         this.router.navigate(['/dashboard']);
