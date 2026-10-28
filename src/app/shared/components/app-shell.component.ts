@@ -35,11 +35,11 @@ export class AppShellComponent {
     // Common
     { label: 'Home',            icon: '⌂', route: '/dashboard',                roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
     { label: 'Community',       icon: '◉', route: '/community',                roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
-    { label: 'Communities',     icon: '🏛', route: '/communities', roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
-    { label: 'Communities (Admin)', icon: '🏛', route: '/admin/communities', roles: ['ADMIN'] },
+    { label: 'Communities',     icon: '🏛', route: '/communities',              roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
+    { label: 'Communities (Admin)', icon: '🏛', route: '/admin/communities',   roles: ['ADMIN'] },
     { label: 'Mentors',         icon: '✦', route: '/mentors',                  roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
     { label: 'Bible',           icon: '✝', route: '/bible',                    roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
-    { label: 'Prayer',          icon: '🙏', route: '/prayer',                  roles: ['MEMBER', 'MENTOR', 'ADMIN'] },  // ← NEW
+    { label: 'Prayer',          icon: '🙏', route: '/prayer',                  roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
     { label: 'Bible Trivia',    icon: '?', route: '/trivia',                   roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
     { label: 'Trivia Analytics', icon: '📊', route: '/admin/trivia-analytics', roles: ['ADMIN'] },
     { label: 'Devotions',       icon: '📖', route: '/devotions',               roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
@@ -57,7 +57,7 @@ export class AppShellComponent {
     { label: 'Reports',         icon: '⚠', route: '/admin/reports',            roles: ['ADMIN'] },
     { label: 'Report Builder',  icon: '⬇', route: '/admin/reports-builder',    roles: ['ADMIN'] },
     { label: 'Notifications',   icon: '🔔', route: '/admin/notifications',     roles: ['ADMIN'] },
-    { label: 'Media Review', icon: '🖼', route: '/admin/media-review', roles: ['ADMIN'] },
+    { label: 'Media Review',    icon: '🖼', route: '/admin/media-review',       roles: ['ADMIN'] },
     { label: 'Devotions (Admin)', icon: '📖', route: '/admin/devotions',       roles: ['ADMIN'] },
     { label: 'Trivia (Admin)',  icon: '?', route: '/admin/trivia',             roles: ['ADMIN'] },
     { label: 'Audit Trail',     icon: '⏱', route: '/admin/audit',              roles: ['ADMIN'] },
@@ -84,7 +84,6 @@ export class AppShellComponent {
   });
 
   constructor() {
-    // Init CallService when a user is logged in
     effect(() => {
       const user = this.auth.user();
       if (user) {
@@ -106,7 +105,6 @@ export class AppShellComponent {
     this.notifOpen.update((v) => !v);
     if (this.notifOpen()) {
       this.userMenuOpen.set(false);
-      // Mark-all-read shortly after opening, so the user still sees the highlight briefly
       setTimeout(() => {
         if (this.notifOpen()) this.notif.markAllRead();
       }, 800);
@@ -139,7 +137,6 @@ export class AppShellComponent {
     return 'Member';
   }
 
-  /** Icon for a notification type. */
   notifIcon(type: string): string {
     switch (type) {
       case 'WELCOME': return '✨';
@@ -149,8 +146,6 @@ export class AppShellComponent {
       case 'ADMIN_BROADCAST': return '📢';
       case 'POST_REPORTED': return '⚠';
       case 'CALL_MISSED': return '📞';
-
-      // ---- Batch 2 additions ----
       case 'POST_LIKE':         return '👍';
       case 'POST_LOVE':         return '❤️';
       case 'POST_AMEN':         return '🙌';
@@ -160,12 +155,10 @@ export class AppShellComponent {
       case 'NEW_FOLLOWER':      return '👤';
       case 'PRAYER':            return '🙏';
       case 'DEVOTION_PUBLISHED':return '📖';
-
       default: return '🔔';
     }
   }
 
-  /** "3m ago" style relative time. */
   timeAgo(iso: string): string {
     const d = new Date(iso).getTime();
     const secs = Math.floor((Date.now() - d) / 1000);
