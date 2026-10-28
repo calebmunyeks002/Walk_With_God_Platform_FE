@@ -5,9 +5,9 @@
 
         <div class="visual-content">
             <div class="brand-top">
-                <span>âœ</span>
+                <span>Ã¢Å“Â</span>
                 <strong>Walk<span>With</span>God</strong>
-                <small>FAITH â€¢ PURPOSE â€¢ GROWTH â€¢ A BETTER YOU</small>
+                <small>FAITH Ã¢â‚¬Â¢ PURPOSE Ã¢â‚¬Â¢ GROWTH Ã¢â‚¬Â¢ A BETTER YOU</small>
             </div>
 
             <div class="hero-copy">
@@ -17,8 +17,8 @@
                     and walk with God together.
                 </p>
                 <blockquote>
-                    â€œAs iron sharpens iron, so one person sharpens another.â€
-                    <small>â€” Proverbs 27:17</small>
+                    Ã¢â‚¬Å“As iron sharpens iron, so one person sharpens another.Ã¢â‚¬Â
+                    <small>Ã¢â‚¬â€ Proverbs 27:17</small>
                 </blockquote>
             </div>
         </div>
@@ -32,23 +32,30 @@
 
             <form (ngSubmit)="submit()">
                 <label>
-                    â—¯
+                    Ã¢â€”Â¯
                     <input name="name" [(ngModel)]="name" required placeholder="Full name" />
                 </label>
 
                 <label>
-                    âœ‰
+                    Ã¢Å“â€°
                     <input name="email" [(ngModel)]="email" type="email" required placeholder="Email address" />
                 </label>
 
                 <label>
-                    â™™
-                    <input name="password" [(ngModel)]="password" type="password" required minlength="8"
-                        placeholder="Password (8+ characters)" />
+                    Ã¢â„¢â„¢
+                    <input
+              [type]="showPassword ? 'text' : 'password'"
+              [(ngModel)]="password"
+              name="password"
+              placeholder="Password (8+ characters)"
+              required />
+            <button type="button" class="eye-btn" (click)="showPassword = !showPassword" title="Toggle password visibility">
+              {{ showPassword ? '🙈' : '👁' }}
+            </button>
                 </label>
 
                 <label>
-                    â™™
+                    Ã¢â„¢â„¢
                     <input name="confirm" [(ngModel)]="confirm" type="password" required
                         placeholder="Confirm password" />
                 </label>
@@ -61,7 +68,7 @@
                 <div class="error" *ngIf="error()">{{ error() }}</div>
 
                 <button class="primary" [disabled]="busy()">
-                    {{ busy() ? 'Creating...' : 'Create Account â†’' }}
+                    {{ busy() ? 'Creating...' : 'Create Account Ã¢â€ â€™' }}
                 </button>
             </form>
 
