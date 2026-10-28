@@ -32,31 +32,36 @@ export class AppShellComponent {
   notifOpen = signal(false);
 
   private allNav: NavItem[] = [
-    { label: 'Home', icon: '⌂', route: '/dashboard', roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
-    { label: 'Community', icon: '◉', route: '/community', roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
-    { label: 'Communities', icon: '🏛', route: '/communities', roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
+    // Common
+    { label: 'Home',            icon: '⌂', route: '/dashboard',                roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
+    { label: 'Community',       icon: '◉', route: '/community',                roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
+    { label: 'Communities',     icon: '🏛', route: '/communities', roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
     { label: 'Communities (Admin)', icon: '🏛', route: '/admin/communities', roles: ['ADMIN'] },
-    { label: 'Mentors', icon: '✦', route: '/mentors', roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
-    { label: 'Bible', icon: '✝', route: '/bible', roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
-    { label: 'Prayer', icon: '🙏', route: '/prayer', roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
-    { label: 'Bible Trivia', icon: '?', route: '/trivia', roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
+    { label: 'Mentors',         icon: '✦', route: '/mentors',                  roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
+    { label: 'Bible',           icon: '✝', route: '/bible',                    roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
+    { label: 'Prayer',          icon: '🙏', route: '/prayer',                  roles: ['MEMBER', 'MENTOR', 'ADMIN'] },  // ← NEW
+    { label: 'Bible Trivia',    icon: '?', route: '/trivia',                   roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
     { label: 'Trivia Analytics', icon: '📊', route: '/admin/trivia-analytics', roles: ['ADMIN'] },
-    { label: 'Devotions', icon: '📖', route: '/devotions', roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
-    { label: 'Inbox', icon: '✉', route: '/inbox', roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
-    { label: 'My Profile', icon: '☺', route: '/profile', roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
-    { label: 'My Requests', icon: '✍', route: '/mentor/requests', roles: ['MENTOR', 'ADMIN'] },
-    { label: 'My Mentees', icon: '☺', route: '/mentor/mentees', roles: ['MENTOR', 'ADMIN'] },
-    { label: 'Users', icon: '◉', route: '/admin/users', roles: ['ADMIN'] },
+    { label: 'Devotions',       icon: '📖', route: '/devotions',               roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
+    { label: 'Inbox',           icon: '✉', route: '/inbox',                    roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
+    { label: 'My Profile',      icon: '☺', route: '/profile',                  roles: ['MEMBER', 'MENTOR', 'ADMIN'] },
+
+    // Mentor
+    { label: 'My Requests',     icon: '✍', route: '/mentor/requests',          roles: ['MENTOR', 'ADMIN'] },
+    { label: 'My Mentees',      icon: '☺', route: '/mentor/mentees',           roles: ['MENTOR', 'ADMIN'] },
+
+    // Admin
+    { label: 'Users',           icon: '◉', route: '/admin/users',              roles: ['ADMIN'] },
     { label: 'Mentor Applications', icon: '✍', route: '/admin/mentor-applications', roles: ['ADMIN'] },
-    { label: 'Content Moderation', icon: '✎', route: '/admin/posts', roles: ['ADMIN'] },
-    { label: 'Reports', icon: '⚠', route: '/admin/reports', roles: ['ADMIN'] },
-    { label: 'Report Builder', icon: '⬇', route: '/admin/reports-builder', roles: ['ADMIN'] },
-    { label: 'Notifications', icon: '🔔', route: '/admin/notifications', roles: ['ADMIN'] },
+    { label: 'Content Moderation', icon: '✎', route: '/admin/posts',           roles: ['ADMIN'] },
+    { label: 'Reports',         icon: '⚠', route: '/admin/reports',            roles: ['ADMIN'] },
+    { label: 'Report Builder',  icon: '⬇', route: '/admin/reports-builder',    roles: ['ADMIN'] },
+    { label: 'Notifications',   icon: '🔔', route: '/admin/notifications',     roles: ['ADMIN'] },
     { label: 'Media Review', icon: '🖼', route: '/admin/media-review', roles: ['ADMIN'] },
-    { label: 'Devotions (Admin)', icon: '📖', route: '/admin/devotions', roles: ['ADMIN'] },
-    { label: 'Trivia (Admin)', icon: '?', route: '/admin/trivia', roles: ['ADMIN'] },
-    { label: 'Audit Trail', icon: '⏱', route: '/admin/audit', roles: ['ADMIN'] },
-    { label: 'Settings', icon: '⚙', route: '/admin/settings', roles: ['ADMIN'] },
+    { label: 'Devotions (Admin)', icon: '📖', route: '/admin/devotions',       roles: ['ADMIN'] },
+    { label: 'Trivia (Admin)',  icon: '?', route: '/admin/trivia',             roles: ['ADMIN'] },
+    { label: 'Audit Trail',     icon: '⏱', route: '/admin/audit',              roles: ['ADMIN'] },
+    { label: 'Settings',        icon: '⚙', route: '/admin/settings',           roles: ['ADMIN'] },
   ];
 
   navItems = computed(() => {
@@ -70,7 +75,8 @@ export class AppShellComponent {
     const common = items.filter((i) => !i.route.startsWith('/admin') && !i.route.startsWith('/mentor'));
     const mentor = items.filter((i) => i.route.startsWith('/mentor'));
     const admin = items.filter((i) => i.route.startsWith('/admin'));
-    const sections = [];
+
+    const sections: { title: string; items: NavItem[] }[] = [];
     if (common.length) sections.push({ title: 'Journey', items: common });
     if (mentor.length) sections.push({ title: 'Mentorship', items: mentor });
     if (admin.length) sections.push({ title: 'Administration', items: admin });
@@ -78,36 +84,98 @@ export class AppShellComponent {
   });
 
   constructor() {
+    // Init CallService when a user is logged in
     effect(() => {
-      if (this.auth.user()) this.call.init(); else this.call.disconnect();
+      const user = this.auth.user();
+      if (user) {
+        this.call.init();
+      } else {
+        this.call.disconnect();
+      }
     });
   }
 
   toggleSidebar() { this.sidebarOpen.update((v) => !v); }
-  toggleUserMenu() { this.userMenuOpen.update((v) => !v); if (this.userMenuOpen()) this.notifOpen.set(false); }
+  toggleUserMenu() {
+    this.userMenuOpen.update((v) => !v);
+    if (this.userMenuOpen()) this.notifOpen.set(false);
+  }
   closeUserMenu() { this.userMenuOpen.set(false); }
-  toggleNotif() { this.notifOpen.update((v) => !v); if (this.notifOpen()) { this.userMenuOpen.set(false); setTimeout(() => { if (this.notifOpen()) this.notif.markAllRead(); }, 800); } }
+
+  toggleNotif() {
+    this.notifOpen.update((v) => !v);
+    if (this.notifOpen()) {
+      this.userMenuOpen.set(false);
+      // Mark-all-read shortly after opening, so the user still sees the highlight briefly
+      setTimeout(() => {
+        if (this.notifOpen()) this.notif.markAllRead();
+      }, 800);
+    }
+  }
   closeNotif() { this.notifOpen.set(false); }
-  openNotification(n: any) { if (!n.read) this.notif.markRead(n.id); if (n.link) this.router.navigateByUrl(n.link); this.closeNotif(); }
-  signOut() { this.userMenuOpen.set(false); this.notifOpen.set(false); this.call.disconnect(); this.auth.logout(); }
-  initials() { const n = this.auth.user()?.name ?? ''; return n ? n.charAt(0).toUpperCase() : 'U'; }
-  roleLabel() { const r = this.auth.user()?.role; return r === 'ADMIN' ? 'Administrator' : r === 'MENTOR' ? 'Mentor' : 'Member'; }
-  
+
+  openNotification(n: { id: string; link: string | null; read: boolean }) {
+    if (!n.read) this.notif.markRead(n.id);
+    if (n.link) this.router.navigateByUrl(n.link);
+    this.closeNotif();
+  }
+
+  signOut() {
+    this.userMenuOpen.set(false);
+    this.notifOpen.set(false);
+    this.call.disconnect();
+    this.auth.logout();
+  }
+
+  initials(): string {
+    const n = this.auth.user()?.name ?? '';
+    return n ? n.charAt(0).toUpperCase() : 'U';
+  }
+
+  roleLabel(): string {
+    const r = this.auth.user()?.role;
+    if (r === 'ADMIN') return 'Administrator';
+    if (r === 'MENTOR') return 'Mentor';
+    return 'Member';
+  }
+
+  /** Icon for a notification type. */
   notifIcon(type: string): string {
     switch (type) {
-      case 'WELCOME': return '✨'; case 'MENTOR_REQUEST': return '✍'; case 'MENTOR_ACCEPTED': return '✓'; case 'MENTOR_DECLINED': return '✕';
-      case 'ADMIN_BROADCAST': return '📢'; case 'POST_REPORTED': return '⚠'; case 'CALL_MISSED': return '📞';
-      case 'POST_LIKE': return '👍'; case 'POST_LOVE': return '❤️'; case 'POST_AMEN': return '🙌'; case 'POST_PRAY': return '🙏';
-      case 'POST_COMMENT': return '💬'; case 'POST_SHARE': return '↗'; case 'NEW_FOLLOWER': return '👤'; case 'PRAYER': return '🙏'; case 'DEVOTION_PUBLISHED': return '📖';
+      case 'WELCOME': return '✨';
+      case 'MENTOR_REQUEST': return '✍';
+      case 'MENTOR_ACCEPTED': return '✓';
+      case 'MENTOR_DECLINED': return '✕';
+      case 'ADMIN_BROADCAST': return '📢';
+      case 'POST_REPORTED': return '⚠';
+      case 'CALL_MISSED': return '📞';
+
+      // ---- Batch 2 additions ----
+      case 'POST_LIKE':         return '👍';
+      case 'POST_LOVE':         return '❤️';
+      case 'POST_AMEN':         return '🙌';
+      case 'POST_PRAY':         return '🙏';
+      case 'POST_COMMENT':      return '💬';
+      case 'POST_SHARE':        return '↗';
+      case 'NEW_FOLLOWER':      return '👤';
+      case 'PRAYER':            return '🙏';
+      case 'DEVOTION_PUBLISHED':return '📖';
+
       default: return '🔔';
     }
   }
 
+  /** "3m ago" style relative time. */
   timeAgo(iso: string): string {
-    const d = new Date(iso).getTime(); const secs = Math.floor((Date.now() - d) / 1000);
-    if (secs < 60) return 'just now'; const mins = Math.floor(secs / 60);
-    if (mins < 60) return `${mins}m ago`; const hrs = Math.floor(mins / 60);
-    if (hrs < 24) return `${hrs}h ago`; const days = Math.floor(hrs / 24);
-    if (days < 7) return `${days}d ago`; return new Date(iso).toLocaleDateString();
+    const d = new Date(iso).getTime();
+    const secs = Math.floor((Date.now() - d) / 1000);
+    if (secs < 60) return 'just now';
+    const mins = Math.floor(secs / 60);
+    if (mins < 60) return `${mins}m ago`;
+    const hrs = Math.floor(mins / 60);
+    if (hrs < 24) return `${hrs}h ago`;
+    const days = Math.floor(hrs / 24);
+    if (days < 7) return `${days}d ago`;
+    return new Date(iso).toLocaleDateString();
   }
 }
