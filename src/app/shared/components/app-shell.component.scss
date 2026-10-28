@@ -409,3 +409,43 @@
   from { opacity: 0; transform: translateY(-10px); }
   to { opacity: 1; transform: translateY(0); }
 }
+
+/* =========================================================
+   BRAND TEXT ALIGNMENT FIX (Sidebar Header)
+   ========================================================= */
+
+.brand {
+  display: flex;
+  align-items: flex-start; /* Aligns cross icon to the top of the text */
+  gap: 12px;
+  padding: 24px 20px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column; /* Forces text to stack vertically */
+  justify-content: center;
+  line-height: 1.2;
+}
+
+.brand-text strong {
+  font-size: 20px;
+  font-weight: 800;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.brand-text strong span {
+  color: #d8c5f0;
+  font-weight: 400;
+}
+
+.brand-text small {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  font-weight: 700;
+  color: #9b87b0;
+  text-transform: uppercase;
+  white-space: nowrap; /* Prevents the text from wrapping into 2 lines */
+}
