@@ -291,4 +291,121 @@
 
 .dropdown-item:hover { background: #f3eafb; color: #6d22a4; }
 .dropdown-item.danger { color: #9f2440; }
-.dropdown-item.danger:hover { background: #fdecec; }
+.dropdown-item.danger:hover { background: #fdecec; }/* =========================================================
+   FINAL DROPDOWN FIX (Bell & User Menu)
+   ========================================================= */
+
+/* 1. Ensure the parent wrappers anchor the dropdowns */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  position: relative;
+}
+
+/* 2. Notification Menu Wrapper */
+.notif-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+/* 3. Notification Dropdown Positioning */
+.notif-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: -50px; /* Shifts it slightly left so it doesn't run off screen */
+  width: 340px;
+  z-index: 9999;
+  background: #fff;
+  border: 1px solid #eee6f4;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(54, 22, 78, 0.15);
+  animation: fadeInDown 0.2s ease-out;
+}
+
+/* 4. User Menu Wrapper */
+.user-menu {
+  position: relative;
+  display: inline-flex;
+}
+
+/* 5. User Dropdown Positioning */
+.user-dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 9999;
+  width: 260px;
+  background: #fff;
+  border: 1px solid #eee6f4;
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(54, 22, 78, 0.15);
+  animation: fadeInDown 0.2s ease-out;
+}
+
+/* 6. Notification Inner Styling */
+.notif-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid #eee6f4;
+  background: #faf8fc;
+}
+
+.notif-list {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.notif-item {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid #f4effa;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.notif-item:hover { background: #faf8fc; }
+.notif-item.unread { background: #fdfbff; }
+.notif-item.unread:hover { background: #f3eafb; }
+
+.notif-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.notif-content strong {
+  display: block;
+  font-size: 13px;
+  color: #2a1740;
+  margin-bottom: 2px;
+}
+
+.notif-content p {
+  margin: 0 0 4px;
+  font-size: 12px;
+  color: #6b5c7a;
+  line-height: 1.4;
+}
+
+.notif-content small {
+  font-size: 11px;
+  color: #8c8295;
+}
+
+.notif-state {
+  padding: 24px;
+  text-align: center;
+  color: #8c8295;
+}
+
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
