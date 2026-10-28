@@ -1,0 +1,323 @@
+.login-page {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  min-height: 100vh;
+  background: #faf6ff;
+}
+
+/* ---------- HERO PANEL ---------- */
+
+.hero-panel {
+  position: relative;
+  padding: 40px 56px;
+  background: linear-gradient(135deg, #2a1740 0%, #4e177e 100%);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1200') center/cover;
+    opacity: 0.35;
+    mix-blend-mode: luminosity;
+  }
+
+  > * { position: relative; z-index: 1; }
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px;
+
+  .brand-mark {
+    font-size: 32px;
+    color: #fbbf24;
+  }
+
+  .brand-text strong {
+    display: block;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    span { color: #d8c5f0; font-weight: 400; }
+  }
+  .brand-text small {
+    display: block;
+    font-size: 10px;
+    letter-spacing: 2px;
+    margin-top: 4px;
+    opacity: .8;
+  }
+}
+
+.hero-title {
+  font: 700 56px/1.1 Georgia, serif;
+  margin: 0 0 20px;
+  .accent { color: #d8c5f0; }
+}
+
+.hero-sub {
+  font-size: 16px;
+  line-height: 1.6;
+  opacity: .9;
+  margin: 0 0 28px;
+}
+
+.hero-quote {
+  font: italic 15px/1.6 Georgia, serif;
+  padding-left: 16px;
+  border-left: 3px solid #fbbf24;
+  margin: 0 0 32px;
+  opacity: .95;
+
+  cite {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    font-style: normal;
+    opacity: .8;
+  }
+}
+
+.hero-features {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  opacity: .85;
+}
+
+/* ---------- FORM PANEL ---------- */
+
+.form-panel {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 24px;
+}
+
+.form-card {
+  width: 100%;
+  max-width: 460px;
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 36px;
+  box-shadow: 0 20px 60px rgba(54, 22, 78, .15);
+}
+
+.form-title {
+  margin: 0;
+  font: 700 32px Georgia, serif;
+  color: #2a1740;
+  text-align: center;
+}
+
+.title-underline {
+  width: 48px;
+  height: 3px;
+  background: linear-gradient(90deg, #8a31cf, #4e177e);
+  border-radius: 2px;
+  margin: 12px auto 16px;
+}
+
+.form-sub {
+  margin: 0 0 24px;
+  text-align: center;
+  font-size: 13px;
+  color: #7b7188;
+}
+
+.error-msg {
+  background: #fdecec;
+  color: #9f2440;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 12px;
+  margin-bottom: 16px;
+}
+
+.field {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #e2d9ec;
+  border-radius: 10px;
+  padding: 0 14px;
+  height: 48px;
+  margin-bottom: 14px;
+  background: #faf8fc;
+  transition: border-color .15s;
+
+  &:focus-within { border-color: #8a31cf; background: #fff; }
+
+  .field-icon { font-size: 14px; color: #8b42c9; }
+
+  input {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    outline: none;
+    font-size: 14px;
+    color: #2a1740;
+    &::placeholder { color: #a8a0b3; }
+  }
+
+  .eye-btn {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px;
+    opacity: .7;
+    &:hover { opacity: 1; }
+  }
+}
+
+.form-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 12px;
+
+  .remember {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #6b5c7a;
+    cursor: pointer;
+    input { accent-color: #8a31cf; }
+  }
+
+  .forgot {
+    color: #6d22a4;
+    text-decoration: underline;
+    &:hover { color: #4e177e; }
+  }
+}
+
+.btn-primary {
+  width: 100%;
+  height: 48px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(90deg, #8a31cf, #4e177e);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: transform .1s, box-shadow .15s;
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(138, 49, 207, .3);
+  }
+
+  &:disabled { opacity: .5; cursor: not-allowed; }
+}
+
+.divider {
+  position: relative;
+  text-align: center;
+  margin: 24px 0 20px;
+  font-size: 10px;
+  color: #8c8295;
+  letter-spacing: 1.5px;
+  font-weight: 800;
+
+  &::before, &::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    width: 35%;
+    height: 1px;
+    background: #e2d9ec;
+  }
+  &::before { left: 0; }
+  &::after { right: 0; }
+
+  span { background: #fff; padding: 0 12px; position: relative; }
+}
+
+.social-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+
+  .social-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    height: 44px;
+    border: 1px solid #e2d9ec;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 13px;
+    font-weight: 700;
+    color: #2a1740;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+
+    &:hover { background: #faf8fc; border-color: #8a31cf; }
+  }
+}
+
+.signup-line {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 12px;
+  color: #6b5c7a;
+
+  .signup-link {
+    color: #6d22a4;
+    font-weight: 800;
+    text-decoration: none;
+    margin-left: 4px;
+    &:hover { text-decoration: underline; }
+  }
+}
+
+.quote-footer {
+  margin-top: 22px;
+  padding: 14px 18px;
+  background: #f3eafb;
+  border-radius: 10px;
+  font: italic 13px/1.5 Georgia, serif;
+  color: #4e177e;
+  text-align: center;
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 900px) {
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-panel {
+    padding: 32px 24px 48px;
+    text-align: center;
+    justify-content: flex-start;
+  }
+
+  .brand { justify-content: center; margin-bottom: 20px; }
+  .hero-title { font-size: 38px; }
+  .hero-sub { font-size: 14px; }
+  .hero-quote { text-align: left; }
+  .hero-features { justify-content: center; gap: 14px; }
+}
+
+@media (max-width: 520px) {
+  .form-panel { padding: 24px 16px; }
+  .form-card { padding: 28px 22px; }
+  .form-title { font-size: 26px; }
+  .social-buttons { grid-template-columns: 1fr; }
+  .hero-title { font-size: 32px; }
+}
