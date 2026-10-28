@@ -32,7 +32,6 @@
       </div>
     }
 
-    <!-- Desktop toggle button at the bottom of the sidebar -->
     <div class="sidebar-footer">
       <button class="collapse-btn" (click)="toggleSidebar()" [title]="sidebarOpen() ? 'Collapse' : 'Expand'">
         {{ sidebarOpen() ? '«' : '»' }}
@@ -42,18 +41,19 @@
 
   <main class="main">
     <header class="topbar">
-      <button class="mobile-menu-btn" (click)="toggleSidebar()">☰</button>
       
-      <!-- Desktop toggle button inline with topbar -->
-      <button class="desktop-toggle-btn" (click)="toggleSidebar()" title="Toggle Sidebar">
-        ☰
-      </button>
-
-      <div class="search-box">
-        <span class="search-icon">⌕</span>
-        <input type="text" placeholder="Search scripture, people, devotion…" aria-label="Search" />
+      <!-- LEFT SIDE: Toggle buttons and Search -->
+      <div class="topbar-left">
+        <button class="mobile-menu-btn" (click)="toggleSidebar()">☰</button>
+        <button class="desktop-toggle-btn" (click)="toggleSidebar()" title="Toggle Sidebar">☰</button>
+        
+        <div class="search-box">
+          <span class="search-icon">⌕</span>
+          <input type="text" placeholder="Search scripture, people, devotion…" aria-label="Search" />
+        </div>
       </div>
 
+      <!-- RIGHT SIDE: Icons and Profile -->
       <div class="topbar-actions">
         <div class="notif-menu">
           <button class="icon-btn notif-btn" (click)="toggleNotif()" [attr.aria-expanded]="notifOpen()" title="Notifications">
@@ -124,6 +124,7 @@
           }
         </div>
       </div>
+
     </header>
 
     <div class="content">

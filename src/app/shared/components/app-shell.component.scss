@@ -1,10 +1,11 @@
 .shell {
   display: flex;
-  height: 100vh; /* Force shell to fill viewport height */
+  height: 100vh;
   background: #f4effa;
   overflow: hidden;
 }
 
+/* ---------- SIDEBAR ---------- */
 .sidebar {
   width: 260px;
   background: #221033;
@@ -16,7 +17,6 @@
   height: 100%;
 }
 
-/* Hide sidebar completely on mobile when collapsed */
 .shell.collapsed .sidebar {
   width: 72px;
 }
@@ -60,34 +60,63 @@
   overflow: hidden;
 }
 
+/* ---------- TOPBAR ALIGNMENT FIX ---------- */
 .topbar {
   display: flex;
   align-items: center;
+  justify-content: space-between; /* Pushes left content and right content to opposite ends */
   padding: 12px 24px;
   background: #fff;
   border-bottom: 1px solid #eee6f4;
-  flex-shrink: 0; /* Prevents topbar from shrinking */
+  flex-shrink: 0;
+  gap: 20px;
 }
 
-/* Hide search bar on very small screens */
-.search-box {
+/* Wrapper for the left side of the topbar (toggle + search) */
+.topbar-left {
+  display: flex;
+  align-items: center;
   flex: 1;
-  max-width: 400px;
-  margin: 0 16px;
+  gap: 16px;
 }
 
+/* Wrapper for the right side of the topbar (notif + msg + user) */
+.topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* Spacing between icons */
+  flex-shrink: 0;
+}
+
+.search-box {
+  display: flex;
+  align-items: center;
+  background: #faf8fc;
+  border: 1px solid #e2d9ec;
+  border-radius: 10px;
+  height: 40px;
+  padding: 0 12px;
+  width: 100%;
+  max-width: 400px; /* Prevents search from growing too wide */
+}
+
+.search-box input {
+  border: 0;
+  background: transparent;
+  outline: none;
+  flex: 1;
+  margin-left: 8px;
+  font-size: 13px;
+  color: #2a1740;
+}
+
+.search-icon {
+  color: #8c8295;
+}
+
+/* Hide search bar on smaller screens */
 @media (max-width: 768px) {
   .search-box { display: none; }
-}
-
-.content {
-  padding: 24px;
-  flex: 1;
-  overflow-y: auto; /* Only the content scrolls */
-}
-
-@media (max-width: 768px) {
-  .content { padding: 16px; }
 }
 
 /* ---------- SIDEBAR INNER STRUCTURE ---------- */
@@ -100,7 +129,6 @@
   flex-shrink: 0;
 }
 
-/* THIS IS THE FIX FOR THE NAVIGATION SCROLLING */
 .nav {
   flex: 1;
   padding: 16px 12px;
@@ -110,7 +138,6 @@
   flex-direction: column;
 }
 
-/* Custom scrollbar for the nav */
 .nav::-webkit-scrollbar { width: 6px; }
 .nav::-webkit-scrollbar-track { background: rgba(255,255,255,0.05); }
 .nav::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
@@ -152,7 +179,6 @@
   .collapse-btn, .sidebar-footer { display: none; }
 }
 
-/* Hide desktop toggle on mobile */
 .desktop-toggle-btn {
   display: none;
   background: transparent;
@@ -160,14 +186,12 @@
   font-size: 20px;
   color: #6d22a4;
   cursor: pointer;
-  margin-right: 16px;
 }
 
 @media (min-width: 992px) {
   .desktop-toggle-btn { display: block; }
 }
 
-/* Mobile hamburger menu (only shows on mobile) */
 .mobile-menu-btn {
   display: none;
   background: transparent;
@@ -175,9 +199,18 @@
   font-size: 24px;
   color: #6d22a4;
   cursor: pointer;
-  margin-right: 12px;
 }
 
 @media (max-width: 991px) {
   .mobile-menu-btn { display: block; }
+}
+
+.content {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+}
+
+@media (max-width: 768px) {
+  .content { padding: 16px; }
 }
