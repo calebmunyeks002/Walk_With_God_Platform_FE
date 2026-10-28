@@ -10,33 +10,32 @@
 .hero-panel {
   position: relative;
   padding: 40px 56px;
-  background: #2a1740; /* Dark fallback */
+  background: #1a1a1a; /* Dark fallback */
   color: #fff;
   display: flex;
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
 
-  /* Restored original background image */
+  /* The image is now natural with NO purple blend */
   &::before {
     content: "";
     position: absolute;
     inset: 0;
     background: url('/assets/login-reference.png') center/cover no-repeat;
-    opacity: 0.4;
-    mix-blend-mode: luminosity; /* Keeps the purple branding tint */
+    z-index: 0;
   }
 
-  /* Add a subtle purple gradient overlay for readability */
+  /* Subtle dark gradient to ensure text is readable */
   &::after {
     content: "";
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(42, 23, 64, 0.8) 0%, rgba(78, 23, 126, 0.6) 100%);
-    z-index: 0;
+    background: linear-gradient(90deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0) 100%);
+    z-index: 1;
   }
 
-  > * { position: relative; z-index: 1; }
+  > * { position: relative; z-index: 2; }
 }
 
 .brand {
@@ -315,6 +314,7 @@
     padding: 32px 24px 48px;
     text-align: center;
     justify-content: flex-start;
+    &::after { background: rgba(0,0,0,0.6); } /* Darker overlay on mobile */
   }
 
   .brand { justify-content: center; margin-bottom: 20px; }
