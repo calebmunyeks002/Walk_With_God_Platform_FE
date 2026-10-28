@@ -1,13 +1,13 @@
 <div class="shell" [class.collapsed]="!sidebarOpen()">
-  @if (sidebarOpen()) { <div class="sidebar-backdrop" (click)="toggleSidebar()"></div> }
+  @if (sidebarOpen()) { <div class="sidebar-backdrop" (click)="closeSidebarOnMobile()"></div> }
 
   <aside class="sidebar">
     <div class="brand">
-      <span class="brand-mark">✝</span>
+      <span class="brand-mark">âœ</span>
       @if (sidebarOpen()) {
         <div class="brand-text">
           <strong>Walk<span>With</span>God</strong>
-          <small>FAITH • PURPOSE • GROWTH</small>
+          <small>FAITH â€¢ PURPOSE â€¢ GROWTH</small>
         </div>
       }
     </div>
@@ -17,7 +17,7 @@
         <div class="nav-section">
           @if (sidebarOpen()) { <span class="nav-section-title">{{ section.title }}</span> }
           @for (item of section.items; track item.route) {
-            <a class="nav-item" [routerLink]="item.route" routerLinkActive="active" [title]="item.label" (click)="toggleSidebar()">
+            <a class="nav-item" [routerLink]="item.route" routerLinkActive="active" [title]="item.label" (click)="closeSidebarOnMobile()">
               <span class="nav-icon">{{ item.icon }}</span>
               @if (sidebarOpen()) { <span class="nav-label">{{ item.label }}</span> }
             </a>
@@ -33,8 +33,8 @@
     }
 
     <div class="sidebar-footer">
-      <button class="collapse-btn" (click)="toggleSidebar()" [title]="sidebarOpen() ? 'Collapse' : 'Expand'">
-        {{ sidebarOpen() ? '«' : '»' }}
+      <button class="collapse-btn" (click)="closeSidebarOnMobile()" [title]="sidebarOpen() ? 'Collapse' : 'Expand'">
+        {{ sidebarOpen() ? 'Â«' : 'Â»' }}
       </button>
     </div>
   </aside>
@@ -44,12 +44,12 @@
       
       <!-- LEFT SIDE: Toggle buttons and Search -->
       <div class="topbar-left">
-        <button class="mobile-menu-btn" (click)="toggleSidebar()">☰</button>
-        <button class="desktop-toggle-btn" (click)="toggleSidebar()" title="Toggle Sidebar">☰</button>
+        <button class="mobile-menu-btn" (click)="closeSidebarOnMobile()">â˜°</button>
+        <button class="desktop-toggle-btn" (click)="closeSidebarOnMobile()" title="Toggle Sidebar">â˜°</button>
         
         <div class="search-box">
-          <span class="search-icon">⌕</span>
-          <input type="text" placeholder="Search scripture, people, devotion…" aria-label="Search" />
+          <span class="search-icon">âŒ•</span>
+          <input type="text" placeholder="Search scripture, people, devotionâ€¦" aria-label="Search" />
         </div>
       </div>
 
@@ -57,7 +57,7 @@
       <div class="topbar-actions">
         <div class="notif-menu">
           <button class="icon-btn notif-btn" (click)="toggleNotif()" [attr.aria-expanded]="notifOpen()" title="Notifications">
-            🔔
+            ðŸ””
             @if (notif.unread() > 0) { <span class="notif-badge">{{ notif.unread() > 99 ? '99+' : notif.unread() }}</span> }
           </button>
 
@@ -69,10 +69,10 @@
                 @if (notif.unread() > 0) { <button class="text-btn" (click)="notif.markAllRead()">Mark all read</button> }
               </div>
               <div class="notif-list">
-                @if (notif.loading()) { <div class="notif-state">Loading…</div> }
+                @if (notif.loading()) { <div class="notif-state">Loadingâ€¦</div> }
                 @else if (notif.recent().length === 0) {
                   <div class="notif-state">
-                    <div class="empty-icon">🔔</div><p>You're all caught up</p><small>New notifications will appear here</small>
+                    <div class="empty-icon">ðŸ””</div><p>You're all caught up</p><small>New notifications will appear here</small>
                   </div>
                 } @else {
                   @for (n of notif.recent().slice(0, 10); track n.id) {
@@ -93,7 +93,7 @@
         </div>
 
         <button class="icon-btn notif-btn" title="Messages" routerLink="/inbox">
-          ✉
+          âœ‰
           @if (notif.unreadMessages() > 0) { <span class="notif-badge">{{ notif.unreadMessages() > 99 ? '99+' : notif.unreadMessages() }}</span> }
         </button>
 
@@ -115,11 +115,11 @@
                 </div>
               </div>
               <div class="dropdown-divider"></div>
-              <a class="dropdown-item" routerLink="/profile" (click)="closeUserMenu()"><span>☺</span> My Profile</a>
-              <a class="dropdown-item" routerLink="/inbox" (click)="closeUserMenu()"><span>✉</span> Inbox</a>
-              <a class="dropdown-item" routerLink="/prayer" (click)="closeUserMenu()"><span>🙏</span> Today's Prayer</a>
+              <a class="dropdown-item" routerLink="/profile" (click)="closeUserMenu()"><span>â˜º</span> My Profile</a>
+              <a class="dropdown-item" routerLink="/inbox" (click)="closeUserMenu()"><span>âœ‰</span> Inbox</a>
+              <a class="dropdown-item" routerLink="/prayer" (click)="closeUserMenu()"><span>ðŸ™</span> Today's Prayer</a>
               <div class="dropdown-divider"></div>
-              <button class="dropdown-item danger" (click)="signOut()"><span>⏻</span> Sign out</button>
+              <button class="dropdown-item danger" (click)="signOut()"><span>â»</span> Sign out</button>
             </div>
           }
         </div>
