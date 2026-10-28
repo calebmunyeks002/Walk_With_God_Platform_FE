@@ -345,3 +345,61 @@
   .social-buttons { grid-template-columns: 1fr; }
   .hero-title { font-size: 32px; }
 }
+/* =========================================================
+   MOBILE RESPONSIVENESS OVERRIDES (Fix for scattered layout)
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .login-page {
+    display: flex;
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
+    overflow-y: auto;
+    background: #f4effa;
+  }
+
+  /* Hide the big hero panel on mobile or make it very small */
+  .hero-panel {
+    display: none; /* Hides the left side completely on mobile so form is the focus */
+  }
+
+  .form-panel {
+    padding: 24px 16px;
+    width: 100%;
+    height: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .form-card {
+    padding: 32px 24px;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(54, 22, 78, 0.1);
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .form-title {
+    font-size: 28px;
+  }
+
+  .field {
+    height: 52px;
+    padding: 0 16px;
+  }
+
+  .social-buttons {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .social-btn {
+    height: 48px;
+  }
+
+  .btn-primary {
+    height: 52px;
+  }
+}
