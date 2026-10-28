@@ -1,6 +1,5 @@
-﻿import { Injectable } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -9,10 +8,9 @@ export class SupabaseService {
   private supabase: SupabaseClient;
 
   constructor() {
-    // You will need to add these to your environment.prod.ts and environment.ts
     this.supabase = createClient(
-      'https://zlwmruimtzxwnurejqpk.supabase.co', 
-      'YOUR_SUPABASE_ANON_KEY' // Replace with your actual anon key
+      'https://zlwmruimtzxwnurejqpk.supabase.co',
+      'sb_publishable_MdvJJEaLx7MMuicbcmRL2Q_9C9l9qdf'
     );
   }
 
@@ -20,7 +18,7 @@ export class SupabaseService {
     return this.supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: window.location.origin + '/login' // Redirects back to login to handle session
+        redirectTo: window.location.origin + '/login'
       }
     });
   }
@@ -34,13 +32,11 @@ export class SupabaseService {
     });
   }
 
-  // Call this on app init or login page to catch the OAuth redirect
   async checkSession() {
     const { data, error } = await this.supabase.auth.getSession();
     if (data.session) {
-      console.log('Logged in with Supabase:', data.session.user.email);
-      // Here you would exchange this Supabase token for your backend JWT
-      // or update your AuthService to recognize the session.
+      return data.session;
     }
+    return null;
   }
 }
