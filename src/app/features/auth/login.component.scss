@@ -10,20 +10,30 @@
 .hero-panel {
   position: relative;
   padding: 40px 56px;
-  background: linear-gradient(135deg, #2a1740 0%, #4e177e 100%);
+  background: #2a1740; /* Dark fallback */
   color: #fff;
   display: flex;
   flex-direction: column;
   justify-content: center;
   overflow: hidden;
 
+  /* Restored original background image */
   &::before {
     content: "";
     position: absolute;
     inset: 0;
-    background: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1200') center/cover;
-    opacity: 0.35;
-    mix-blend-mode: luminosity;
+    background: url('https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=1600&q=80') center/cover no-repeat;
+    opacity: 0.4;
+    mix-blend-mode: luminosity; /* Keeps the purple branding tint */
+  }
+
+  /* Add a subtle purple gradient overlay for readability */
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(42, 23, 64, 0.8) 0%, rgba(78, 23, 126, 0.6) 100%);
+    z-index: 0;
   }
 
   > * { position: relative; z-index: 1; }
