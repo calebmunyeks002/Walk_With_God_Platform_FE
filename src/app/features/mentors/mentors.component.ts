@@ -4,9 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ApiService } from '../../core/services/api.service';
 import { AuthService } from '../../core/services/auth.service';
-import {
-  Mentor, MentorshipRequest, MyMentorshipState,
-} from '../../core/models/models';
+import { Mentor, MentorshipRequest, MyMentorshipState } from '../../core/models/models';
 
 @Component({
   standalone: true,
@@ -33,12 +31,24 @@ export class MentorsComponent implements OnInit {
   experience = 'any';
   sort = 'name';
 
-  /* Request modal */
+  // Request Modal
   requestOpen = signal(false);
   requestTarget = signal<Mentor | null>(null);
   requestMessage = '';
   sending = signal(false);
   errorMsg = signal('');
+
+  // Apply Modal
+  applyOpen = signal(false);
+  applyForm = {
+    qualifications: '',
+    organization: '',
+    yearsExperience: 1,
+    documentUrl: ''
+  };
+  applying = signal(false);
+  applyError = signal('');
+  applySuccess = signal(false);
 
   ngOnInit(): void {
     this.load();
@@ -51,12 +61,9 @@ export class MentorsComponent implements OnInit {
         this.state.set(s);
         this.api.mentors().subscribe({
           next: (list) => {
-            // If I have an active mentor → show only that mentor
             if (s.activeMentorship) {
-              const mine = list.filter(
-                (m) => m.user.id === s.activeMentorship!.mentor.userId
-              );
-              this.mentors.set(mine);
+              // Show only my active mentor
+              this.mentors.set(list.filter(m => m.user.id === s.activeMentorship!.mentor.userId));
             } else {
               this.mentors.set(list);
             }
@@ -69,24 +76,30 @@ export class MentorsComponent implements OnInit {
     });
   }
 
-  /* ----- Filtering (client-side for v1) ----- */
-
   filtered(): Mentor[] {
     let out = this.mentors();
     const q = this.search.trim().toLowerCase();
     if (q) {
       out = out.filter((m) =>
         m.user.name.toLowerCase().includes(q) ||
-        (m.church ?? '').toLowerCase().includes(q)
+        (m.church ?? '').toLowerCase().includes(q) ||
+        (m.specialties ?? []).some(s => s.toLowerCase().includes(q))
       );
     }
     if (this.specialty !== 'all') {
       out = out.filter((m) => m.specialties.includes(this.specialty));
     }
+    if (this.experience !== 'any') {
+      const min = parseInt(this.experience, 10);
+      out = out.filter((m) => m.yearsExperience >= min);
+    }
+    if (this.sort === 'name') {
+      out.sort((a, b) => a.user.name.localeCompare(b.user.name));
+    } else if (this.sort === 'rating') {
+      out.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+    }
     return out;
   }
-
-  /* ----- Request flow ----- */
 
   canRequestMentor(m: Mentor): boolean {
     const s = this.state();
@@ -132,17 +145,11 @@ export class MentorsComponent implements OnInit {
     });
   }
 
-  /* ----- Chat with active mentor ----- */
-
   openChatWithMentor() {
     const active = this.state().activeMentorship;
     if (!active) return;
-    this.router.navigate(['/inbox'], {
-      queryParams: { user: active.mentor.userId },
-    });
+    this.router.navigate(['/inbox'], { queryParams: { user: active.mentor.userId } });
   }
-
-  /* ----- End mentorship ----- */
 
   endMentorship() {
     const active = this.state().activeMentorship;
@@ -151,6 +158,43 @@ export class MentorsComponent implements OnInit {
     if (reason === null) return;
     this.api.endMentorship(active.id, reason || undefined).subscribe({
       next: () => this.load(),
+    });
+  }
+
+  // --- Apply as Mentor ---
+  openApply() {
+    this.applyForm = { qualifications: '', organization: '', yearsExperience: 1, documentUrl: '' };
+    this.applyError.set('');
+    this.applySuccess.set(false);
+    this.applyOpen.set(true);
+  }
+
+  closeApply() {
+    this.applyOpen.set(false);
+  }
+
+  submitApply() {
+    if (!this.applyForm.qualifications.trim()) {
+      this.applyError.set('Please provide your qualifications.');
+      return;
+    }
+    this.applying.set(true);
+    this.applyError.set('');
+
+    this.api.applyAsMentor({
+      qualifications: this.applyForm.qualifications,
+      organization: this.applyForm.organization || undefined,
+      yearsExperience: this.applyForm.yearsExperience,
+      documentUrl: this.applyForm.documentUrl || undefined,
+    }).subscribe({
+      next: () => {
+        this.applying.set(false);
+        this.applySuccess.set(true);
+      },
+      error: (e) => {
+        this.applyError.set(e?.error?.message ?? 'Failed to submit application.');
+        this.applying.set(false);
+      },
     });
   }
 }
