@@ -1,3 +1,4 @@
+﻿import { SupabaseService } from '../../core/services/supabase.service';
 import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -35,5 +36,13 @@ export class LoginComponent {
         this.busy.set(false);
       },
     });
+  }
+    
+  loginWithGoogle() {
+    this.supabaseService.signInWithGoogle();
+  }
+
+  loginWithApple() {
+    this.supabaseService.signInWithApple();
   }
 }

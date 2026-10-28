@@ -1,4 +1,4 @@
-<div class="auth-page">
+﻿<div class="auth-page">
     <!-- Full-screen background image -->
     <div class="visual-bg"></div>
     <div class="visual-overlay"></div>
@@ -6,9 +6,9 @@
     <!-- Left-side hero content (brand, headline, benefits) -->
     <div class="visual-content">
         <div class="brand-top">
-            <span>✝</span>
+            <span>âœ</span>
             <strong>Walk<span>With</span>God</strong>
-            <small>FAITH • PURPOSE • GROWTH • A BETTER YOU</small>
+            <small>FAITH â€¢ PURPOSE â€¢ GROWTH â€¢ A BETTER YOU</small>
         </div>
 
         <div class="hero-copy">
@@ -20,15 +20,15 @@
             </p>
 
             <blockquote>
-                “But those who hope in the LORD will renew their strength. They will soar on wings like eagles...”
-                <small>— Isaiah 40:31</small>
+                â€œBut those who hope in the LORD will renew their strength. They will soar on wings like eagles...â€
+                <small>â€” Isaiah 40:31</small>
             </blockquote>
 
             <div class="benefits">
-                <span>▣<b>Daily<br />Inspiration</b></span>
-                <span>♧<b>Supportive<br />Community</b></span>
-                <span>▥<b>Personal<br />Growth</b></span>
-                <span>♡<b>A Closer<br />Walk with God</b></span>
+                <span>â–£<b>Daily<br />Inspiration</b></span>
+                <span>â™§<b>Supportive<br />Community</b></span>
+                <span>â–¥<b>Personal<br />Growth</b></span>
+                <span>â™¡<b>A Closer<br />Walk with God</b></span>
             </div>
         </div>
     </div>
@@ -45,15 +45,15 @@
 
             <form (ngSubmit)="login()">
                 <label>
-                    ✉
+                    âœ‰
                     <input name="email" [(ngModel)]="email" type="email" required placeholder="Email address" />
                 </label>
 
                 <label>
-                    ♙
+                    â™™
                     <input name="password" [(ngModel)]="password" [type]="show() ? 'text' : 'password'" required
                         placeholder="Password" />
-                    <button type="button" class="eye" (click)="show.update(v => !v)">◉</button>
+                    <button type="button" class="eye" (click)="show.update(v => (click)="loginWithApple()" (click)="loginWithGoogle()" !v)">â—‰</button>
                 </label>
 
                 <div class="row">
@@ -67,7 +67,7 @@
                 <div class="error" *ngIf="error()">{{ error() }}</div>
 
                 <button class="primary" [disabled]="busy()">
-                    {{ busy() ? 'Signing in...' : 'Log In →' }}
+                    {{ busy() ? 'Signing in...' : 'Log In â†’' }}
                 </button>
             </form>
 
@@ -100,12 +100,12 @@
             </div>
 
             <p class="signup-line">
-                Don’t have an account? <a routerLink="/signup">Sign Up</a>
+                Donâ€™t have an account? <a routerLink="/signup">Sign Up</a>
             </p>
 
             <div class="card-quote">
-                “With God, every step forward<br />
-                is a step toward a better you.”
+                â€œWith God, every step forward<br />
+                is a step toward a better you.â€
             </div>
         </div>
     </section>
