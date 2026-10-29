@@ -33,6 +33,18 @@ export class LoginComponent {
 
   async checkOAuthSession() {
     try {
+      // Check if the URL has an error from Google/Supabase
+      const urlParams = new URLSearchParams(window.location.search);
+      const hashParams = new URLSearchParams(window.location.hash.substring(1));
+      const errorDesc = urlParams.get('error_description') || hashParams.get('error_description');
+      
+      if (errorDesc) {
+        this.error = 'OAuth failed: ' + decodeURIComponent(errorDesc).replace(/\+/g, ' ');
+        // Clean the URL so the error doesn't stick
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return;
+      }
+
       const session = await this.supabaseService.getSessionFromUrl();
       if (!session) return;
 
