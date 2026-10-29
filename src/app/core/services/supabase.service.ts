@@ -10,8 +10,8 @@ export class SupabaseService {
 
   constructor() {
     this.supabase = createClient(
-      environment.supabaseUrl || 'https://zlwmruimtzxwnurejqpk.supabase.co',
-      environment.supabaseAnonKey || 'sb_publishable_MdvJJEaLx7MMuicbcmRL2Q_9C9l9qdf',
+      environment.supabaseUrl,
+      environment.supabaseAnonKey,
       {
         auth: {
           detectSessionInUrl: true,
@@ -24,18 +24,14 @@ export class SupabaseService {
   signInWithGoogle() {
     return this.supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: {
-        redirectTo: window.location.origin + '/login'
-      }
+      options: { redirectTo: window.location.origin + '/login' }
     });
   }
 
   signInWithApple() {
     return this.supabase.auth.signInWithOAuth({
       provider: 'apple',
-      options: {
-        redirectTo: window.location.origin + '/login'
-      }
+      options: { redirectTo: window.location.origin + '/login' }
     });
   }
 

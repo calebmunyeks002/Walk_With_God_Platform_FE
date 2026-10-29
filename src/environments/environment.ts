@@ -1,9 +1,7 @@
-﻿export const environment = {
-  supabaseUrl: 'https://zlwmruimtzxwnurejqpk.supabase.co',
-  supabaseAnonKey: 'YOUR_SUPABASE_ANON_KEY',
+export const environment = {
   production: false,
-  /** Empty base = use relative URLs, so the Angular proxy handles /api requests. */
   apiUrl: '',
-  /** Same â€” proxy handles /ws. */
   wsUrl: '/ws',
+  supabaseUrl: 'https://zlwmruimtzxwnurejqpk.supabase.co',
+  supabaseAnonKey: 'sb_publishable_MdvJJEaLx7MMuicbcmRL2Q_9C9l9qdf',
 };
