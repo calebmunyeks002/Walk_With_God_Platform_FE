@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { createClient, SupabaseClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient, Session } from '@supabase/supabase-js';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
@@ -9,8 +10,14 @@ export class SupabaseService {
 
   constructor() {
     this.supabase = createClient(
-      'https://zlwmruimtzxwnurejqpk.supabase.co',
-      'sb_publishable_MdvJJEaLx7MMuicbcmRL2Q_9C9l9qdf'
+      environment.supabaseUrl || 'https://zlwmruimtzxwnurejqpk.supabase.co',
+      environment.supabaseAnonKey || 'sb_publishable_MdvJJEaLx7MMuicbcmRL2Q_9C9l9qdf',
+      {
+        auth: {
+          detectSessionInUrl: true,
+          flowType: 'implicit'
+        }
+      }
     );
   }
 
@@ -32,11 +39,12 @@ export class SupabaseService {
     });
   }
 
-  async checkSession() {
+  async getSessionFromUrl(): Promise<Session | null> {
     const { data, error } = await this.supabase.auth.getSession();
-    if (data.session) {
-      return data.session;
+    if (error) {
+      console.error('Error getting session:', error.message);
+      return null;
     }
-    return null;
+    return data.session;
   }
 }

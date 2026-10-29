@@ -2,8 +2,10 @@ import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../core/services/auth.service';
 import { SupabaseService } from '../../core/services/supabase.service';
+import { environment } from '../../../environments/environment';
 
 @Component({
   standalone: true,
@@ -16,6 +18,7 @@ export class LoginComponent {
   private auth = inject(AuthService);
   private router = inject(Router);
   private supabaseService = inject(SupabaseService);
+  private http = inject(HttpClient);
 
   email = '';
   password = '';
@@ -30,11 +33,21 @@ export class LoginComponent {
 
   async checkOAuthSession() {
     try {
-      const session = await this.supabaseService.checkSession();
-      if (session) {
-        console.log('OAuth Login Successful for:', session.user.email);
-        // TODO: Exchange this token with backend once /api/auth/oauth-login exists
-      }
+      const session = await this.supabaseService.getSessionFromUrl();
+      if (!session) return;
+
+      this.http.post<{ token: string; user: any }>(
+        `${environment.apiUrl}/api/auth/oauth-login`,
+        { supabaseToken: session.access_token }
+      ).subscribe({
+        next: (res) => {
+          localStorage.setItem('wwg_token', res.token);
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err) => {
+          this.error = err?.error?.message || 'OAuth login failed.';
+        },
+      });
     } catch (err) {
       console.error('Failed to check OAuth session', err);
     }
@@ -46,7 +59,6 @@ export class LoginComponent {
     this.loading = true;
     this.error = '';
 
-    // Your AuthService.login() requires 3 args: email, password, remember
     this.auth.login(this.email, this.password, this.remember).subscribe({
       next: () => {
         this.loading = false;
