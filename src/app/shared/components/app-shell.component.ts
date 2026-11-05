@@ -70,7 +70,7 @@ export class AppShellComponent {
     const common = items.filter((i) => !i.route.startsWith('/admin') && !i.route.startsWith('/mentor'));
     const mentor = items.filter((i) => i.route.startsWith('/mentor'));
     const admin = items.filter((i) => i.route.startsWith('/admin'));
-    const sections: { title: string; items: NavItem[] }[] = [];
+    const sections = [];
     if (common.length) sections.push({ title: 'Journey', items: common });
     if (mentor.length) sections.push({ title: 'Mentorship', items: mentor });
     if (admin.length) sections.push({ title: 'Administration', items: admin });
@@ -89,11 +89,11 @@ export class AppShellComponent {
   closeUserMenu() { this.userMenuOpen.set(false); }
   toggleNotif() { this.notifOpen.update((v) => !v); if (this.notifOpen()) { this.userMenuOpen.set(false); setTimeout(() => { if (this.notifOpen()) this.notif.markAllRead(); }, 800); } }
   closeNotif() { this.notifOpen.set(false); }
-  openNotification(n: { id: string; link: string | null; read: boolean }) { if (!n.read) this.notif.markRead(n.id); if (n.link) this.router.navigateByUrl(n.link); this.closeNotif(); }
+  openNotification(n: any) { if (!n.read) this.notif.markRead(n.id); if (n.link) this.router.navigateByUrl(n.link); this.closeNotif(); }
   signOut() { this.userMenuOpen.set(false); this.notifOpen.set(false); this.call.disconnect(); this.auth.logout(); }
   initials() { const n = this.auth.user()?.name ?? ''; return n ? n.charAt(0).toUpperCase() : 'U'; }
   roleLabel() { const r = this.auth.user()?.role; return r === 'ADMIN' ? 'Administrator' : r === 'MENTOR' ? 'Mentor' : 'Member'; }
-  
+
   notifIcon(type: string): string {
     switch (type) {
       case 'WELCOME': return '✨'; case 'MENTOR_REQUEST': return '✍'; case 'MENTOR_ACCEPTED': return '✓'; case 'MENTOR_DECLINED': return '✕';
