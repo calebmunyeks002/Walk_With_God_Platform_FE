@@ -449,3 +449,57 @@
   text-transform: uppercase;
   white-space: nowrap; /* Prevents the text from wrapping into 2 lines */
 }
+
+/* =========================================================
+   DEFINITIVE MOBILE OVERRIDES (App Shell)
+   ========================================================= */
+@media (max-width: 991px) {
+  /* The sidebar is hidden by default on mobile */
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    height: 100vh !important;
+    width: 260px !important;
+    transform: translateX(-100%) !important; /* Slide completely off-screen */
+    z-index: 2000 !important;
+    transition: transform 0.3s ease !important;
+  }
+
+  /* When the sidebar is open, slide it into view */
+  .shell:not(.collapsed) .sidebar {
+    transform: translateX(0) !important;
+  }
+
+  /* The dark backdrop behind the open sidebar */
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 1999;
+    backdrop-filter: blur(2px);
+  }
+
+  /* Ensure the main content takes 100% width */
+  .main {
+    width: 100vw !important;
+    margin-left: 0 !important;
+  }
+
+  /* Hide the desktop toggle button on mobile */
+  .desktop-toggle-btn { display: none !important; }
+  
+  /* Show the mobile menu button */
+  .mobile-menu-btn { 
+    display: block !important; 
+    margin-right: 12px;
+  }
+}
+
+@media (min-width: 992px) {
+  /* On desktop, hide the mobile backdrop */
+  .sidebar-backdrop { display: none !important; }
+  /* Hide the mobile hamburger icon */
+  .mobile-menu-btn { display: none !important; }
+}
